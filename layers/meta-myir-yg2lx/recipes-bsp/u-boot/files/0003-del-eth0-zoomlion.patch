@@ -1,0 +1,63 @@
+diff --git a/arch/arm/dts/myb-rzg2l-base.dts b/arch/arm/dts/myb-rzg2l-base.dts
+index 66bb9081..3836803d 100644
+--- a/arch/arm/dts/myb-rzg2l-base.dts
++++ b/arch/arm/dts/myb-rzg2l-base.dts
+@@ -27,6 +27,7 @@
+ };
+ 
+ &pinctrl {
++/*
+ 	eth0_pins: eth0 {
+ 		pinmux = <RZG2L_PINMUX(20, 0, 1)>,
+ 				<RZG2L_PINMUX(20, 1, 1)>,
+@@ -47,7 +48,7 @@
+ 				<RZG2L_PINMUX(27, 1, 1)>,
+ 				<RZG2L_PINMUX(28, 0, 1)>;
+ 	};
+-
++*/
+ 	i2c1_pins: i2c1 {
+ 		pinmux = <RZG2L_PINMUX(14, 2, 1)>,
+ 				<RZG2L_PINMUX(14, 3, 1)>;
+@@ -108,7 +109,7 @@
+ 	bus-width = <4>;
+ 	status = "okay";
+ };
+-
++/*
+ &eth0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&eth0_pins>;
+@@ -120,7 +121,7 @@
+ 		reg = <4>;
+ 	};
+ };
+-
++*/
+ &i2c1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&i2c1_pins>;
+diff --git a/configs/myc-rzg2l_ddr1gb_defconfig b/configs/myc-rzg2l_ddr1gb_defconfig
+index 7939a320..f9df268f 100644
+--- a/configs/myc-rzg2l_ddr1gb_defconfig
++++ b/configs/myc-rzg2l_ddr1gb_defconfig
+@@ -32,6 +32,7 @@ CONFIG_CMD_EXT4=y
+ CONFIG_CMD_EXT4_WRITE=y
+ CONFIG_CMD_FAT=y
+ CONFIG_CMD_FS_GENERIC=y
++CONFIG_FS_CRAMFS=y
+ CONFIG_OF_CONTROL=y
+ CONFIG_OF_LIST="myc-rzg2l"
+ CONFIG_MULTI_DTB_FIT_LZO=y
+diff --git a/configs/myc-rzg2l_defconfig b/configs/myc-rzg2l_defconfig
+index ca66d2df..5c574a10 100644
+--- a/configs/myc-rzg2l_defconfig
++++ b/configs/myc-rzg2l_defconfig
+@@ -32,6 +32,7 @@ CONFIG_CMD_EXT4=y
+ CONFIG_CMD_EXT4_WRITE=y
+ CONFIG_CMD_FAT=y
+ CONFIG_CMD_FS_GENERIC=y
++CONFIG_FS_CRAMFS=y
+ CONFIG_OF_CONTROL=y
+ CONFIG_OF_LIST="myc-rzg2l"
+ CONFIG_MULTI_DTB_FIT_LZO=y

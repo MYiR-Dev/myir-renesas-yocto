@@ -1,0 +1,935 @@
+diff --git a/arch/arm/dts/myb-rzg2l-base.dts b/arch/arm/dts/myb-rzg2l-base.dts
+index 53af915b..66bb9081 100644
+--- a/arch/arm/dts/myb-rzg2l-base.dts
++++ b/arch/arm/dts/myb-rzg2l-base.dts
+@@ -53,6 +53,29 @@
+ 				<RZG2L_PINMUX(14, 3, 1)>;
+ 	};
+ 
++	 usb0_pins: usb0 {
++                pinmux = <RZG2L_PINMUX(4, 0, 1)>, /* VBUS */
++                         <RZG2L_PINMUX(5, 0, 1)>, /* OVC */
++                         <RZG2L_PINMUX(5, 1, 1)>; /* OTG_ID */
++        };
++
++        usb1_pins: usb1 {
++                pinmux = <RZG2L_PINMUX(42, 0, 1)>, /* VBUS */
++                         <RZG2L_PINMUX(42, 1, 1)>; /* OVC */
++        };
++
++        usb0_pins: usb0 {
++                pinmux = <RZG2L_PINMUX(5, 0, 1)>,
++                        <RZG2L_PINMUX(5, 2, 1)>,
++                        <RZG2L_PINMUX(5, 3, 1)>;
++        };
++
++        usb1_pins: usb1 {
++                pinmux = <RZG2L_PINMUX(6, 0, 1)>,
++                        <RZG2L_PINMUX(5, 4, 5)>;
++        };
++
++
+ };
+ 
+ &xinclk {
+@@ -108,3 +131,38 @@
+ 		reg = <0x3d>;
+ 	};
+ };
++
++&usb2_phy0 {
++        status = "okay";
++};
++
++&ohci0 {
++        status = "okay";
++};
++
++&ehci0 {
++        /* pinctrl placeholder
++         * If HCD, the following pins must be defined.
++         *  VBUSEN  - P4_0 pin.
++         *  OVERCUR - P5_0 pin.
++        */
++        status = "okay";
++};
++
++&usb2_phy1 {
++        status = "okay";
++};
++
++&ohci1 {
++        status = "okay";
++};
++
++&ehci1 {
++        /* pinctrl placeholder
++         * If HCD, the following pins must be defined.
++         *  VBUSEN  - P42_0 pin.
++         *  OVERCUR - P42_1 pin.
++        */
++        status = "okay";
++};
++
+diff --git a/arch/arm/dts/myb-rzg2l.dts b/arch/arm/dts/myb-rzg2l.dts
+index 3d38b7c8..fc216655 100644
+--- a/arch/arm/dts/myb-rzg2l.dts
++++ b/arch/arm/dts/myb-rzg2l.dts
+@@ -27,4 +27,11 @@
+ 		reg = <0 0x48000000 0 0x78000000>;
+ 	};
+ 
++	vbus0_usb2: regulator-vbus0-usb2 {
++                compatible = "regulator-fixed";
++                regulator-name = "USB20_VBUS0";
++                regulator-min-microvolt = <5000000>;
++                regulator-max-microvolt = <5000000>;
++        };
++
+ };
+diff --git a/arch/arm/dts/smarc-rzg2l.dts b/arch/arm/dts/smarc-rzg2l.dts
+index 0f1de89a..22a63465 100644
+--- a/arch/arm/dts/smarc-rzg2l.dts
++++ b/arch/arm/dts/smarc-rzg2l.dts
+@@ -29,6 +29,12 @@
+ 		/* first 128MB is reserved for secure area. */
+ 		reg = <0 0x48000000 0 0x78000000>;
+ 	};
++		vbus0_usb2: regulator-vbus0-usb2 {
++		compatible = "regulator-fixed";
++		regulator-name = "USB20_VBUS0";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++	};
+ 
+ };
+ 
+@@ -59,6 +65,29 @@
+ 		pinmux = <RZG2L_PINMUX(14, 2, 1)>,
+ 				<RZG2L_PINMUX(14, 3, 1)>;
+ 	};
++	
++	usb0_pins: usb0 {
++		pinmux = <RZG2L_PINMUX(4, 0, 1)>, /* VBUS */
++			 <RZG2L_PINMUX(5, 0, 1)>, /* OVC */
++			 <RZG2L_PINMUX(5, 1, 1)>; /* OTG_ID */
++	};
++
++	usb1_pins: usb1 {
++		pinmux = <RZG2L_PINMUX(42, 0, 1)>, /* VBUS */
++			 <RZG2L_PINMUX(42, 1, 1)>; /* OVC */
++	};
++	
++	usb0_pins: usb0 {
++		pinmux = <RZG2L_PINMUX(5, 0, 1)>,
++			<RZG2L_PINMUX(5, 2, 1)>,
++			<RZG2L_PINMUX(5, 3, 1)>;
++	};
++
++	usb1_pins: usb1 {
++		pinmux = <RZG2L_PINMUX(6, 0, 1)>,
++			<RZG2L_PINMUX(5, 4, 5)>;
++	};
++
+ 
+ };
+ 
+@@ -115,3 +144,37 @@
+ 		reg = <0x3d>;
+ 	};
+ };
++
++&usb2_phy0 {
++	status = "okay";
++};
++
++&ohci0 {
++	status = "okay";
++};
++
++&ehci0 {
++	/* pinctrl placeholder
++	 * If HCD, the following pins must be defined.
++	 *  VBUSEN  - P4_0 pin.
++	 *  OVERCUR - P5_0 pin.
++	*/
++	status = "okay";
++};
++
++&usb2_phy1 {
++	status = "okay";
++};
++
++&ohci1 {
++	status = "okay";
++};
++
++&ehci1 {
++	/* pinctrl placeholder
++	 * If HCD, the following pins must be defined.
++	 *  VBUSEN  - P42_0 pin.
++	 *  OVERCUR - P42_1 pin.
++	*/
++	status = "okay";
++};
+diff --git a/arch/arm/dts/smarc-rzg2ul.dts b/arch/arm/dts/smarc-rzg2ul.dts
+index 77c06a54..b48c7c90 100644
+--- a/arch/arm/dts/smarc-rzg2ul.dts
++++ b/arch/arm/dts/smarc-rzg2ul.dts
+@@ -29,6 +29,12 @@
+ 		/* first 128MB is reserved for secure area. */
+ 		reg = <0 0x48000000 0 0x38000000>;
+ 	};
++		vbus0_usb2: regulator-vbus0-usb2 {
++		compatible = "regulator-fixed";
++		regulator-name = "USB20_VBUS0";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++	};
+ 
+ };
+ 
+@@ -50,6 +56,29 @@
+ 				<RZG2L_PINMUX(10, 3, 1)>,
+ 				<RZG2L_PINMUX(10, 4, 1)>;
+ 	};
++
++	usb0_pins: usb0 {
++		pinmux = <RZG2L_PINMUX(4, 0, 1)>, /* VBUS */
++			 <RZG2L_PINMUX(5, 0, 1)>, /* OVC */
++			 <RZG2L_PINMUX(5, 1, 1)>; /* OTG_ID */
++	};
++
++	usb1_pins: usb1 {
++		pinmux = <RZG2L_PINMUX(42, 0, 1)>, /* VBUS */
++			 <RZG2L_PINMUX(42, 1, 1)>; /* OVC */
++	};
++	
++	usb0_pins: usb0 {
++		pinmux = <RZG2L_PINMUX(5, 0, 1)>,
++			<RZG2L_PINMUX(5, 2, 1)>,
++			<RZG2L_PINMUX(5, 3, 1)>;
++	};
++
++	usb1_pins: usb1 {
++		pinmux = <RZG2L_PINMUX(6, 0, 1)>,
++			<RZG2L_PINMUX(5, 4, 5)>;
++	};
++
+ };
+ 
+ &xinclk {
+@@ -92,3 +121,37 @@
+ &i2c0 {
+ 	status = "okay";
+ };
++
++&usb2_phy0 {
++	status = "okay";
++};
++
++&ohci0 {
++	status = "okay";
++};
++
++&ehci0 {
++	/* pinctrl placeholder
++	 * If HCD, the following pins must be defined.
++	 *  VBUSEN  - P4_0 pin.
++	 *  OVERCUR - P5_0 pin.
++	*/
++	status = "okay";
++};
++
++&usb2_phy1 {
++	status = "okay";
++};
++
++&ohci1 {
++	status = "okay";
++};
++
++&ehci1 {
++	/* pinctrl placeholder
++	 * If HCD, the following pins must be defined.
++	 *  VBUSEN  - P42_0 pin.
++	 *  OVERCUR - P42_1 pin.
++	*/
++	status = "okay";
++};
+diff --git a/board/myir/myc-rzg2l/myc-rzg2l.c b/board/myir/myc-rzg2l/myc-rzg2l.c
+index a6e98719..9cb9f363 100755
+--- a/board/myir/myc-rzg2l/myc-rzg2l.c
++++ b/board/myir/myc-rzg2l/myc-rzg2l.c
+@@ -36,6 +36,7 @@ DECLARE_GLOBAL_DATA_PTR;
+ /* CPG */
+ #define CPG_BASE					0x11010000
+ #define CPG_CLKON_BASE				(CPG_BASE + 0x500)
++#define CPG_CLKMON_BASE				(CPG_BASE + 0x680)
+ #define CPG_RESET_BASE				(CPG_BASE + 0x800)
+ #define CPG_RESET_ETH				(CPG_RESET_BASE + 0x7C)
+ #define CPG_RESET_I2C                           (CPG_RESET_BASE + 0x80)
+@@ -61,6 +62,8 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define PFC_PM3B                              (PFC_BASE + 0x176)
+ #define PFC_PMC3B                             (PFC_BASE + 0x23B)
+ 
++static void board_usb_init(void);
++
+ void s_init(void)
+ {
+ 	/* SD1 power control: P39_1 = 0; P39_2 = 1; */
+@@ -126,6 +129,9 @@ int board_init(void)
+ 	*(volatile u32 *)(PFC_P3B) = (*(volatile u32 *)(PFC_P3B) & 0xFFFFFFF7) | 0x0;
+ 	mdelay(13);
+ 	*(volatile u32 *)(PFC_P3B) = (*(volatile u32 *)(PFC_P3B) & 0xFFFFFFF7) | 0x08;
++	
++	/* PINCTRL, USB-PHY, USB_BLK init */
++	board_usb_init();
+ 
+ 	return 0;
+ }
+@@ -134,3 +140,165 @@ void reset_cpu(void)
+ {
+ 
+ }
++
++#define CPG_RESET_USB                           (CPG_RESET_BASE + 0x78)
++#define CPG_CLKON_USB                           (CPG_CLKON_BASE + 0x78)
++#define CPG_CLKMON_USB                          (CPG_CLKMON_BASE + 0x78)
++#define CPG_RESET_SYC                           (CPG_RESET_BASE + 0x28)
++#define CPG_CLKON_SYC                           (CPG_CLKON_BASE + 0x28)
++#define CPG_CLKMON_SYC                          (CPG_CLKMON_BASE + 0x28)
++#define CPG_RESET_DMAC                           (CPG_RESET_BASE + 0x2C)
++#define CPG_CLKON_DMAC                           (CPG_CLKON_BASE + 0x2C)
++#define CPG_CLKMON_DMAC                          (CPG_CLKMON_BASE + 0x2C)
++#define CPG_RESET_GPIO                           (CPG_RESET_BASE + 0x98)
++#define CPG_CLKON_GPIO                           (CPG_CLKON_BASE + 0x98)
++#define CPG_CLKMON_GPIO                          (CPG_CLKMON_BASE + 0x98)
++
++#define PFC_PWPR                                                                (PFC_BASE + 0x3014)
++#define PFC_PMC_BASE                                                    (PFC_BASE + 0x200)
++#define PFC_PFC_BASE                                                    (PFC_BASE + 0x400)
++
++#define PFC_PMC15                                                               (PFC_PMC_BASE + 0x15)
++#define PFC_PMC16                                                               (PFC_PMC_BASE + 0x16)
++#define PFC_PMC3A                                                               (PFC_PMC_BASE + 0x3A)
++#define PFC_PFC14                                                               (PFC_PFC_BASE + 4*(0x14))
++#define PFC_PFC15                                                               (PFC_PFC_BASE + 4*(0x15))
++#define PFC_PFC16                                                               (PFC_PMC_BASE + 4*(0x16))
++#define PFC_PFC3A                                                               (PFC_PMC_BASE + 4*(0x3A))
++
++
++static void board_usb_init(void)
++{
++	/* Enable SYC */
++	if ((*(volatile u32 *)CPG_CLKMON_SYC) != 0x00000001) {
++		(*(volatile u32 *)CPG_RESET_SYC) = 0x00010000;
++		(*(volatile u32 *)CPG_RESET_SYC) = 0x00010001;
++		(*(volatile u32 *)CPG_CLKON_SYC) = 0x00010001;
++	}
++	/* Enable DMAC */
++	if ((*(volatile u32 *)CPG_CLKMON_DMAC) != 0x00000003) {
++		(*(volatile u32 *)CPG_RESET_DMAC) = 0x00030000;
++		(*(volatile u32 *)CPG_RESET_DMAC) = 0x00030003;
++		(*(volatile u32 *)CPG_CLKON_DMAC) = 0x00030003;
++	}
++
++	/* Enable GPIO */
++	if ((*(volatile u32 *)CPG_CLKMON_GPIO) != 0x00000001) {
++		(*(volatile u32 *)CPG_RESET_GPIO) = 0x00070007;
++		(*(volatile u32 *)CPG_RESET_GPIO) = 0x00070007;
++		(*(volatile u32 *)CPG_CLKON_GPIO) = 0x00010001;
++	}
++	/* Enable USB */
++	if ((*(volatile u32 *)CPG_CLKMON_USB) != 0x0000000f) {
++		(*(volatile u32 *)CPG_RESET_USB) = 0x000f0000;
++		(*(volatile u32 *)CPG_RESET_USB) = 0x000f000f;
++		(*(volatile u32 *)CPG_CLKON_USB) = 0x000f000f;
++
++	}
++
++/* Setup  */
++	/* Disable GPIO Write Protect */
++	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 7);    /* PWPR.BOWI = 0 */
++	(*(volatile u32 *)PFC_PWPR) |= (0x1u << 6);     /* PWPR.PFCWE = 1 */
++	(*(volatile u32 *)PFC_PWPR);                    /* barrier */
++
++	/* Enable USB0 HCD/PCD */
++	/* DP/DM are fixed */
++	/* set P4_0 as Func.1 for VBUSEN */
++	     /* PMC14.b0 = 1 */
++	    /* PFC14.PFC0 = 0 */
++	
++
++	/* set P5_0 as Func.1 for OVC */
++	(*(volatile u8 *)PFC_PMC15) |= (0x1u << 0);
++	(*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 0);
++	(*(volatile u8 *)PFC_PFC15) |= (0x1u << 0);
++
++	/* set P5_1 as Func.1 for OTG_ID */
++	(*(volatile u8 *)PFC_PMC15) |= (0x1u << 1);
++	(*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 8);
++	(*(volatile u8 *)PFC_PFC15) |= (0x1u << 8);
++
++/* Enable USB1 HCD */
++	/* DP/DM are fixed */
++	/* set P42_0 as Func.1 for VBUSEN */
++	(*(volatile u8 *)PFC_PMC3A) |= (0x1u << 0);     /* PMC15.b0 = 1 */
++	(*(volatile u8 *)PFC_PFC3A) &= ~(0x7u << 0);    /* PFC15.PFC0 = 0 */
++	(*(volatile u8 *)PFC_PFC3A) |= (0x1u << 0);
++
++	/* set P42_1 as Func.1 for OVC */
++	(*(volatile u8 *)PFC_PMC3A) |= (0x1u << 1);
++	(*(volatile u8 *)PFC_PFC3A) &= ~(0x7u << 8);
++	(*(volatile u8 *)PFC_PFC3A) |= (0x1u << 8);
++
++	/* Enable write protect */
++	/* Enable PFC write protect */
++	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 6);    /* PWPR.PFCWE = 0 */
++	(*(volatile u32 *)PFC_PWPR) |= (0x1u << 7);     /* PWPR.BOWI = 1 */
++	(*(volatile u32 *)PFC_PWPR);                    /* barrier */
++
++
++/********************************************/
++
++#define USBPHY_BASE             (0x11c40000)
++#define USB0_BASE               (0x11c50000)
++#define USBF_BASE               (0x11c60000)
++#define USB1_BASE               (0x11c70000)
++
++	/* Reset USB2.0 PHY */
++#define USBPHY_RESET            (USBPHY_BASE + 0x000u)
++#define USBPHY_UDIRPD           (USBPHY_BASE + 0x01cu)
++
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001133u;
++	udelay(1);
++#if 1   /* US0/USB1 use: USB0=OTG, USB1=Host */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001000u;
++#endif
++#if 0   /* USB1 unuse: USB0=OTG, USB1=USBTEST */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001011u;  /* USB0 only */
++#endif
++#if 0   /* USB0 unuse: USB0=USBTEST, USB1=OTG */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001000u;  /* USB1 only */
++#endif
++	udelay(100);
++
++/********************************************/
++/* USBTEST registers */
++#define RESET                   (0x000)
++#define UCLKCTL                 (0x018)
++#define UDIRPD                  (0x01c)
++#define CON_CTRL                (0x020)
++#define CLK_STAT                (0x104)
++
++#define HcRhDescriptorA         (0x048)
++#define COMMCTRL                (0x800)
++#define LPSTS                   (0x102)
++
++/* Setup USB0 */
++/* Release USB_BLK module from the standby state (in board_cpg_init) */
++
++	/* Overcurrent function is not supported now */
++	(*(volatile u32 *)(USB0_BASE + HcRhDescriptorA)) |= (0x1u << 12);       /* NOCP = 1 */
++	/* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBTEST_BASE + UCLKCTL)) =                   // TO BE FIXED
++	 /* Select host / peripheral operation (USB0 only) */
++	(*(volatile u32 *)(USB0_BASE + COMMCTRL)) = 0;                  /* USB0 is host mode */
++	 /* Set USBPHY normal operation (Function only) */
++	//      (*(volatile u16 *)USBF_BASE + LPSTS) |= (0x1u << 14);           /* USBPHY.SUSPM = 1 (func only) */
++	/* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBCTR.PLL_RST =                             // TO BE FIXED
++        /* wait 100 usec */
++			   udelay(100);
++
++	/* Setup USB1 */
++			      /* Release USB_BLK module from the standby state (in board_cpg_init) */
++
++		                                  /* Overcurrent function is not supported now */
++        (*(volatile u32 *)(USB1_BASE + HcRhDescriptorA)) |= (0x1u << 12);       /* NOCP = 1 */
++	/* Select the clock supplid to USBPHY */
++	//      (*(volatile u32 *)(USBCTR.PLL_RST =                             // TO BE FIXED
++	//      /* wait 100 usec */
++	udelay(100);
++}
++
++
+diff --git a/board/renesas/rzg2l-dev/rzg2l-dev.c b/board/renesas/rzg2l-dev/rzg2l-dev.c
+index 49e8d9d1..bc4d4733 100644
+--- a/board/renesas/rzg2l-dev/rzg2l-dev.c
++++ b/board/renesas/rzg2l-dev/rzg2l-dev.c
+@@ -35,6 +35,7 @@ DECLARE_GLOBAL_DATA_PTR;
+ /* CPG */
+ #define CPG_BASE					0x11010000
+ #define CPG_CLKON_BASE				(CPG_BASE + 0x500)
++#define CPG_CLKMON_BASE				(CPG_BASE + 0x680)
+ #define CPG_RESET_BASE				(CPG_BASE + 0x800)
+ #define CPG_RESET_ETH				(CPG_RESET_BASE + 0x7C)
+ #define CPG_RESET_I2C                           (CPG_RESET_BASE + 0x80)
+@@ -46,6 +47,8 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define PFC_PM37					(PFC_BASE + 0x16E)
+ #define PFC_PMC37					(PFC_BASE + 0x237)
+ 
++static void board_usb_init(void);
++
+ void s_init(void)
+ {
+ 	/* SD1 power control: P39_1 = 0; P39_2 = 1; */
+@@ -86,6 +89,9 @@ int board_init(void)
+ 	/* adress of boot parameters */
+ 	gd->bd->bi_boot_params = CONFIG_SYS_TEXT_BASE + 0x50000;
+ 
++	/* PINCTRL, USB-PHY, USB_BLK init */
++	board_usb_init();
++
+ 	return 0;
+ }
+ 
+@@ -93,3 +99,161 @@ void reset_cpu(void)
+ {
+ 
+ }
++
++#define CPG_RESET_USB                           (CPG_RESET_BASE + 0x78)
++#define CPG_CLKON_USB                           (CPG_CLKON_BASE + 0x78)
++#define CPG_CLKMON_USB                          (CPG_CLKMON_BASE + 0x78)
++#define CPG_RESET_SYC                           (CPG_RESET_BASE + 0x28)
++#define CPG_CLKON_SYC                           (CPG_CLKON_BASE + 0x28)
++#define CPG_CLKMON_SYC                          (CPG_CLKMON_BASE + 0x28)
++#define CPG_RESET_DMAC                           (CPG_RESET_BASE + 0x2C)
++#define CPG_CLKON_DMAC                           (CPG_CLKON_BASE + 0x2C)
++#define CPG_CLKMON_DMAC                          (CPG_CLKMON_BASE + 0x2C)
++#define CPG_RESET_GPIO                           (CPG_RESET_BASE + 0x98)
++#define CPG_CLKON_GPIO                           (CPG_CLKON_BASE + 0x98)
++#define CPG_CLKMON_GPIO                          (CPG_CLKMON_BASE + 0x98)
++
++#define PFC_PWPR								(PFC_BASE + 0x3014)
++#define PFC_PMC_BASE							(PFC_BASE + 0x200)
++#define PFC_PFC_BASE							(PFC_BASE + 0x400)
++
++#define PFC_PMC15								(PFC_PMC_BASE + 0x15)
++#define PFC_PMC16								(PFC_PMC_BASE + 0x16)
++#define PFC_PMC3A								(PFC_PMC_BASE + 0x3A)
++#define PFC_PFC14								(PFC_PFC_BASE + 4*(0x14))
++#define PFC_PFC15								(PFC_PFC_BASE + 4*(0x15))
++#define PFC_PFC16								(PFC_PMC_BASE + 4*(0x16))
++#define PFC_PFC3A								(PFC_PMC_BASE + 4*(0x3A))
++
++static void board_usb_init(void)
++{
++	/* Enable SYC */
++	if ((*(volatile u32 *)CPG_CLKMON_SYC) != 0x00000001) {
++		(*(volatile u32 *)CPG_RESET_SYC) = 0x00010000;
++		(*(volatile u32 *)CPG_RESET_SYC) = 0x00010001;
++		(*(volatile u32 *)CPG_CLKON_SYC) = 0x00010001;
++	}
++	/* Enable DMAC */
++	if ((*(volatile u32 *)CPG_CLKMON_DMAC) != 0x00000003) {
++		(*(volatile u32 *)CPG_RESET_DMAC) = 0x00030000;
++		(*(volatile u32 *)CPG_RESET_DMAC) = 0x00030003;
++		(*(volatile u32 *)CPG_CLKON_DMAC) = 0x00030003;
++	}
++
++	/* Enable GPIO */
++	if ((*(volatile u32 *)CPG_CLKMON_GPIO) != 0x00000001) {
++		(*(volatile u32 *)CPG_RESET_GPIO) = 0x00070007;
++		(*(volatile u32 *)CPG_RESET_GPIO) = 0x00070007;
++		(*(volatile u32 *)CPG_CLKON_GPIO) = 0x00010001;
++	}
++	/* Enable USB */
++	if ((*(volatile u32 *)CPG_CLKMON_USB) != 0x0000000f) {
++		(*(volatile u32 *)CPG_RESET_USB) = 0x000f0000;
++		(*(volatile u32 *)CPG_RESET_USB) = 0x000f000f;
++		(*(volatile u32 *)CPG_CLKON_USB) = 0x000f000f;
++	}
++
++/* Setup  */
++	/* Disable GPIO Write Protect */
++	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 7);	/* PWPR.BOWI = 0 */
++	(*(volatile u32 *)PFC_PWPR) |= (0x1u << 6);	/* PWPR.PFCWE = 1 */
++	(*(volatile u32 *)PFC_PWPR);			/* barrier */
++
++/* Enable USB0 HCD/PCD */
++	/* DP/DM are fixed */
++	/* set P4_0 as Func.1 for VBUSEN */
++		/* PMC14.b0 = 1 */
++		/* PFC14.PFC0 = 0 */
++	
++
++	/* set P5_0 as Func.1 for OVC */
++	(*(volatile u8 *)PFC_PMC15) |= (0x1u << 0);
++	(*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 0);
++	(*(volatile u8 *)PFC_PFC15) |= (0x1u << 0);
++
++	/* set P5_1 as Func.1 for OTG_ID */
++	(*(volatile u8 *)PFC_PMC15) |= (0x1u << 1);
++	(*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 8);
++	(*(volatile u8 *)PFC_PFC15) |= (0x1u << 8);
++
++/* Enable USB1 HCD */
++	/* DP/DM are fixed */
++	/* set P42_0 as Func.1 for VBUSEN */
++	(*(volatile u8 *)PFC_PMC3A) |= (0x1u << 0);	/* PMC15.b0 = 1 */
++	(*(volatile u8 *)PFC_PFC3A) &= ~(0x7u << 0);	/* PFC15.PFC0 = 0 */
++	(*(volatile u8 *)PFC_PFC3A) |= (0x1u << 0);
++
++	/* set P42_1 as Func.1 for OVC */
++	(*(volatile u8 *)PFC_PMC3A) |= (0x1u << 1);
++	(*(volatile u8 *)PFC_PFC3A) &= ~(0x7u << 8);
++	(*(volatile u8 *)PFC_PFC3A) |= (0x1u << 8);
++
++/* Enable write protect */
++	/* Enable PFC write protect */
++	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 6);	/* PWPR.PFCWE = 0 */
++	(*(volatile u32 *)PFC_PWPR) |= (0x1u << 7);	/* PWPR.BOWI = 1 */
++	(*(volatile u32 *)PFC_PWPR);			/* barrier */
++
++/********************************************/
++
++#define	USBPHY_BASE		(0x11c40000)
++#define	USB0_BASE		(0x11c50000)
++#define	USBF_BASE		(0x11c60000)
++#define	USB1_BASE		(0x11c70000)
++
++/* Reset USB2.0 PHY */
++#define	USBPHY_RESET		(USBPHY_BASE + 0x000u)
++#define	USBPHY_UDIRPD		(USBPHY_BASE + 0x01cu)
++
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001133u;
++	udelay(1);
++#if 1	/* US0/USB1 use: USB0=OTG, USB1=Host */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001000u;
++#endif
++#if 0	/* USB1 unuse: USB0=OTG, USB1=USBTEST */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001011u;	/* USB0 only */
++#endif
++#if 0	/* USB0 unuse: USB0=USBTEST, USB1=OTG */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001000u;	/* USB1 only */
++#endif
++	udelay(100);
++
++/********************************************/
++
++/* USBTEST registers */
++#define	RESET			(0x000)
++#define	UCLKCTL			(0x018)
++#define	UDIRPD			(0x01c)
++#define	CON_CTRL		(0x020)
++#define	CLK_STAT		(0x104)
++
++#define	HcRhDescriptorA		(0x048)
++#define COMMCTRL		(0x800)
++#define LPSTS			(0x102)
++
++/* Setup USB0 */
++  /* Release USB_BLK module from the standby state (in board_cpg_init) */
++
++  /* Overcurrent function is not supported now */
++	(*(volatile u32 *)(USB0_BASE + HcRhDescriptorA)) |= (0x1u << 12);	/* NOCP = 1 */
++  /* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBTEST_BASE + UCLKCTL)) =			// TO BE FIXED
++  /* Select host / peripheral operation (USB0 only) */
++	(*(volatile u32 *)(USB0_BASE + COMMCTRL)) = 0;			/* USB0 is host mode */
++  /* Set USBPHY normal operation (Function only) */
++//	(*(volatile u16 *)USBF_BASE + LPSTS) |= (0x1u << 14);		/* USBPHY.SUSPM = 1 (func only) */
++  /* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBCTR.PLL_RST =				// TO BE FIXED
++  /* wait 100 usec */
++	udelay(100);
++
++/* Setup USB1 */
++  /* Release USB_BLK module from the standby state (in board_cpg_init) */
++
++  /* Overcurrent function is not supported now */
++	(*(volatile u32 *)(USB1_BASE + HcRhDescriptorA)) |= (0x1u << 12);	/* NOCP = 1 */
++  /* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBCTR.PLL_RST =				// TO BE FIXED
++  /* wait 100 usec */
++	udelay(100);
++}
+\ No newline at end of file
+diff --git a/board/renesas/rzg2ul-dev/rzg2ul-dev.c b/board/renesas/rzg2ul-dev/rzg2ul-dev.c
+index 310ddcde..5f50d663 100644
+--- a/board/renesas/rzg2ul-dev/rzg2ul-dev.c
++++ b/board/renesas/rzg2ul-dev/rzg2ul-dev.c
+@@ -36,6 +36,7 @@ DECLARE_GLOBAL_DATA_PTR;
+ /* CPG */
+ #define CPG_BASE					0x11010000
+ #define CPG_CLKON_BASE				(CPG_BASE + 0x500)
++#define CPG_CLKMON_BASE				(CPG_BASE + 0x680)
+ #define CPG_RESET_BASE				(CPG_BASE + 0x800)
+ #define CPG_RESET_ETH				(CPG_RESET_BASE + 0x7C)
+ #define CPG_RESET_I2C                           (CPG_RESET_BASE + 0x80)
+@@ -58,6 +59,8 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define	PFC_PM1D			(PFC_BASE + 0x013A)
+ #define	PFC_PMC1D			(PFC_BASE + 0x021D)
+ 
++static void board_usb_init(void);
++
+ void s_init(void)
+ {
+ #if CONFIG_TARGET_SMARC_RZG2UL
+@@ -160,6 +163,9 @@ int board_init(void)
+ 	/* adress of boot parameters */
+ 	gd->bd->bi_boot_params = CONFIG_SYS_TEXT_BASE + 0x50000;
+ 
++	/* PINCTRL, USB-PHY, USB_BLK init */
++	board_usb_init();
++
+ 	return 0;
+ }
+ 
+@@ -167,3 +173,161 @@ void reset_cpu(void)
+ {
+ 
+ }
++
++#define CPG_RESET_USB                           (CPG_RESET_BASE + 0x78)
++#define CPG_CLKON_USB                           (CPG_CLKON_BASE + 0x78)
++#define CPG_CLKMON_USB                          (CPG_CLKMON_BASE + 0x78)
++#define CPG_RESET_SYC                           (CPG_RESET_BASE + 0x28)
++#define CPG_CLKON_SYC                           (CPG_CLKON_BASE + 0x28)
++#define CPG_CLKMON_SYC                          (CPG_CLKMON_BASE + 0x28)
++#define CPG_RESET_DMAC                           (CPG_RESET_BASE + 0x2C)
++#define CPG_CLKON_DMAC                           (CPG_CLKON_BASE + 0x2C)
++#define CPG_CLKMON_DMAC                          (CPG_CLKMON_BASE + 0x2C)
++#define CPG_RESET_GPIO                           (CPG_RESET_BASE + 0x98)
++#define CPG_CLKON_GPIO                           (CPG_CLKON_BASE + 0x98)
++#define CPG_CLKMON_GPIO                          (CPG_CLKMON_BASE + 0x98)
++
++#define PFC_PWPR								(PFC_BASE + 0x3014)
++#define PFC_PMC_BASE							(PFC_BASE + 0x200)
++#define PFC_PFC_BASE							(PFC_BASE + 0x400)
++
++#define PFC_PMC15								(PFC_PMC_BASE + 0x15)
++#define PFC_PMC16								(PFC_PMC_BASE + 0x16)
++#define PFC_PMC3A								(PFC_PMC_BASE + 0x3A)
++#define PFC_PFC14								(PFC_PFC_BASE + 4*(0x14))
++#define PFC_PFC15								(PFC_PFC_BASE + 4*(0x15))
++#define PFC_PFC16								(PFC_PMC_BASE + 4*(0x16))
++#define PFC_PFC3A								(PFC_PMC_BASE + 4*(0x3A))
++
++static void board_usb_init(void)
++{
++	/* Enable SYC */
++	if ((*(volatile u32 *)CPG_CLKMON_SYC) != 0x00000001) {
++		(*(volatile u32 *)CPG_RESET_SYC) = 0x00010000;
++		(*(volatile u32 *)CPG_RESET_SYC) = 0x00010001;
++		(*(volatile u32 *)CPG_CLKON_SYC) = 0x00010001;
++	}
++	/* Enable DMAC */
++	if ((*(volatile u32 *)CPG_CLKMON_DMAC) != 0x00000003) {
++		(*(volatile u32 *)CPG_RESET_DMAC) = 0x00030000;
++		(*(volatile u32 *)CPG_RESET_DMAC) = 0x00030003;
++		(*(volatile u32 *)CPG_CLKON_DMAC) = 0x00030003;
++	}
++
++	/* Enable GPIO */
++	if ((*(volatile u32 *)CPG_CLKMON_GPIO) != 0x00000001) {
++		(*(volatile u32 *)CPG_RESET_GPIO) = 0x00070007;
++		(*(volatile u32 *)CPG_RESET_GPIO) = 0x00070007;
++		(*(volatile u32 *)CPG_CLKON_GPIO) = 0x00010001;
++	}
++	/* Enable USB */
++	if ((*(volatile u32 *)CPG_CLKMON_USB) != 0x0000000f) {
++		(*(volatile u32 *)CPG_RESET_USB) = 0x000f0000;
++		(*(volatile u32 *)CPG_RESET_USB) = 0x000f000f;
++		(*(volatile u32 *)CPG_CLKON_USB) = 0x000f000f;
++	}
++
++/* Setup  */
++	/* Disable GPIO Write Protect */
++	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 7);	/* PWPR.BOWI = 0 */
++	(*(volatile u32 *)PFC_PWPR) |= (0x1u << 6);	/* PWPR.PFCWE = 1 */
++	(*(volatile u32 *)PFC_PWPR);			/* barrier */
++
++/* Enable USB0 HCD/PCD */
++	/* DP/DM are fixed */
++	/* set P4_0 as Func.1 for VBUSEN */
++		/* PMC14.b0 = 1 */
++		/* PFC14.PFC0 = 0 */
++	
++
++	/* set P5_0 as Func.1 for OVC */
++	(*(volatile u8 *)PFC_PMC15) |= (0x1u << 0);
++	(*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 0);
++	(*(volatile u8 *)PFC_PFC15) |= (0x1u << 0);
++
++	/* set P5_1 as Func.1 for OTG_ID */
++	(*(volatile u8 *)PFC_PMC15) |= (0x1u << 1);
++	(*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 8);
++	(*(volatile u8 *)PFC_PFC15) |= (0x1u << 8);
++
++/* Enable USB1 HCD */
++	/* DP/DM are fixed */
++	/* set P42_0 as Func.1 for VBUSEN */
++	(*(volatile u8 *)PFC_PMC3A) |= (0x1u << 0);	/* PMC15.b0 = 1 */
++	(*(volatile u8 *)PFC_PFC3A) &= ~(0x7u << 0);	/* PFC15.PFC0 = 0 */
++	(*(volatile u8 *)PFC_PFC3A) |= (0x1u << 0);
++
++	/* set P42_1 as Func.1 for OVC */
++	(*(volatile u8 *)PFC_PMC3A) |= (0x1u << 1);
++	(*(volatile u8 *)PFC_PFC3A) &= ~(0x7u << 8);
++	(*(volatile u8 *)PFC_PFC3A) |= (0x1u << 8);
++
++/* Enable write protect */
++	/* Enable PFC write protect */
++	(*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 6);	/* PWPR.PFCWE = 0 */
++	(*(volatile u32 *)PFC_PWPR) |= (0x1u << 7);	/* PWPR.BOWI = 1 */
++	(*(volatile u32 *)PFC_PWPR);			/* barrier */
++
++/********************************************/
++
++#define	USBPHY_BASE		(0x11c40000)
++#define	USB0_BASE		(0x11c50000)
++#define	USBF_BASE		(0x11c60000)
++#define	USB1_BASE		(0x11c70000)
++
++/* Reset USB2.0 PHY */
++#define	USBPHY_RESET		(USBPHY_BASE + 0x000u)
++#define	USBPHY_UDIRPD		(USBPHY_BASE + 0x01cu)
++
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001133u;
++	udelay(1);
++#if 1	/* US0/USB1 use: USB0=OTG, USB1=Host */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001000u;
++#endif
++#if 0	/* USB1 unuse: USB0=OTG, USB1=USBTEST */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001011u;	/* USB0 only */
++#endif
++#if 0	/* USB0 unuse: USB0=USBTEST, USB1=OTG */
++	(*(volatile u32 *)USBPHY_RESET) = 0x00001000u;	/* USB1 only */
++#endif
++	udelay(100);
++
++/********************************************/
++
++/* USBTEST registers */
++#define	RESET			(0x000)
++#define	UCLKCTL			(0x018)
++#define	UDIRPD			(0x01c)
++#define	CON_CTRL		(0x020)
++#define	CLK_STAT		(0x104)
++
++#define	HcRhDescriptorA		(0x048)
++#define COMMCTRL		(0x800)
++#define LPSTS			(0x102)
++
++/* Setup USB0 */
++  /* Release USB_BLK module from the standby state (in board_cpg_init) */
++
++  /* Overcurrent function is not supported now */
++	(*(volatile u32 *)(USB0_BASE + HcRhDescriptorA)) |= (0x1u << 12);	/* NOCP = 1 */
++  /* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBTEST_BASE + UCLKCTL)) =			// TO BE FIXED
++  /* Select host / peripheral operation (USB0 only) */
++	(*(volatile u32 *)(USB0_BASE + COMMCTRL)) = 0;			/* USB0 is host mode */
++  /* Set USBPHY normal operation (Function only) */
++//	(*(volatile u16 *)USBF_BASE + LPSTS) |= (0x1u << 14);		/* USBPHY.SUSPM = 1 (func only) */
++  /* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBCTR.PLL_RST =				// TO BE FIXED
++  /* wait 100 usec */
++	udelay(100);
++
++/* Setup USB1 */
++  /* Release USB_BLK module from the standby state (in board_cpg_init) */
++
++  /* Overcurrent function is not supported now */
++	(*(volatile u32 *)(USB1_BASE + HcRhDescriptorA)) |= (0x1u << 12);	/* NOCP = 1 */
++  /* Select the clock supplid to USBPHY */
++//	(*(volatile u32 *)(USBCTR.PLL_RST =				// TO BE FIXED
++  /* wait 100 usec */
++	udelay(100);
++}
+\ No newline at end of file
+diff --git a/drivers/phy/phy-rcar-gen3.c b/drivers/phy/phy-rcar-gen3.c
+index 8c596314..f54bd48d 100644
+--- a/drivers/phy/phy-rcar-gen3.c
++++ b/drivers/phy/phy-rcar-gen3.c
+@@ -59,7 +59,7 @@ struct rcar_gen3_phy {
+ static int rcar_gen3_phy_phy_init(struct phy *phy)
+ {
+ 	struct rcar_gen3_phy *priv = dev_get_priv(phy->dev);
+-
++#if 0
+ 	/* Initialize USB2 part */
+ 	writel(0, priv->regs + USB2_INT_ENABLE);
+ 	writel(USB2_SPD_RSM_TIMSET_INIT, priv->regs + USB2_SPD_RSM_TIMSET);
+@@ -71,12 +71,13 @@ static int rcar_gen3_phy_phy_init(struct phy *phy)
+ 	clrbits_le32(priv->regs + USB2_COMMCTRL, USB2_COMMCTRL_OTG_PERI);
+ 
+ 	setbits_le32(priv->regs + USB2_ADPCTRL, USB2_ADPCTRL_DRVVBUS);
+-
++#endif
+ 	return 0;
+ }
+ 
+ static int rcar_gen3_phy_phy_power_on(struct phy *phy)
+ {
++#if 0
+ 	struct rcar_gen3_phy *priv = dev_get_priv(phy->dev);
+ 	int ret;
+ 
+@@ -88,18 +89,21 @@ static int rcar_gen3_phy_phy_power_on(struct phy *phy)
+ 
+ 	setbits_le32(priv->regs + USB2_USBCTR, USB2_USBCTR_PLL_RST);
+ 	clrbits_le32(priv->regs + USB2_USBCTR, USB2_USBCTR_PLL_RST);
+-
++#endif
+ 	return 0;
+ }
+ 
+ static int rcar_gen3_phy_phy_power_off(struct phy *phy)
+ {
++#if 0
+ 	struct rcar_gen3_phy *priv = dev_get_priv(phy->dev);
+ 
+ 	if (!priv->vbus_supply)
+ 		return 0;
+ 
+ 	return regulator_set_enable(priv->vbus_supply, false);
++#endif	
++	return 0;
+ }
+ 
+ static const struct phy_ops rcar_gen3_phy_phy_ops = {
+@@ -111,12 +115,14 @@ static const struct phy_ops rcar_gen3_phy_phy_ops = {
+ static int rcar_gen3_phy_probe(struct udevice *dev)
+ {
+ 	struct rcar_gen3_phy *priv = dev_get_priv(dev);
++#if 0
+ 	int ret;
++#endif
+ 
+ 	priv->regs = dev_read_addr(dev);
+ 	if (priv->regs == FDT_ADDR_T_NONE)
+ 		return -EINVAL;
+-
++#if 0
+ 	ret = device_get_supply_regulator(dev, "vbus-supply",
+ 					  &priv->vbus_supply);
+ 	if (ret && ret != -ENOENT) {
+@@ -132,7 +138,7 @@ static int rcar_gen3_phy_probe(struct udevice *dev)
+ 	ret = clk_enable(&priv->clk);
+ 	if (ret)
+ 		return ret;
+-
++#endif
+ 	return 0;
+ }
+ 
+diff --git a/drivers/usb/host/ehci-generic.c b/drivers/usb/host/ehci-generic.c
+index 4c28a69b..c4db3b59 100644
+--- a/drivers/usb/host/ehci-generic.c
++++ b/drivers/usb/host/ehci-generic.c
+@@ -148,8 +148,9 @@ static int ehci_usb_probe(struct udevice *dev)
+ 	err = ehci_enable_vbus_supply(dev);
+ 	if (err)
+ 		goto reset_err;
+-
++#if 0
+ 	err = ehci_setup_phy(dev, &priv->phy, 0);
++#endif
+ 	if (err)
+ 		goto regulator_err;
+ 

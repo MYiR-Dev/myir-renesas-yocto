@@ -1,0 +1,40 @@
+From 7b22b370dba430970a917d4cbc2e0f4c14ca8623 Mon Sep 17 00:00:00 2001
+From: Canh Dao <canh.dao.ct@renesas.com>
+Date: Wed, 13 Apr 2022 23:59:28 +0700
+Subject: [PATCH 2/2] arm64: dts: renesas: rzg2lc-smarc: Disable SCIF1, OSTM2 
+ to be used in FreeRTOS
+
+---
+ arch/arm64/boot/dts/renesas/rzg2lc-smarc-som.dtsi | 2 +-
+ arch/arm64/boot/dts/renesas/rzg2lc-smarc.dtsi     | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/renesas/rzg2lc-smarc-som.dtsi b/arch/arm64/boot/dts/renesas/rzg2lc-smarc-som.dtsi
+index 899d66944d75..6e137bef5eb6 100644
+--- a/arch/arm64/boot/dts/renesas/rzg2lc-smarc-som.dtsi
++++ b/arch/arm64/boot/dts/renesas/rzg2lc-smarc-som.dtsi
+@@ -340,7 +340,7 @@ &ostm1 {
+ };
+ 
+ &ostm2 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &ehci0 {
+diff --git a/arch/arm64/boot/dts/renesas/rzg2lc-smarc.dtsi b/arch/arm64/boot/dts/renesas/rzg2lc-smarc.dtsi
+index c06cabb7a734..5f147e03c044 100644
+--- a/arch/arm64/boot/dts/renesas/rzg2lc-smarc.dtsi
++++ b/arch/arm64/boot/dts/renesas/rzg2lc-smarc.dtsi
+@@ -101,7 +101,7 @@ &scif1 {
+ 	pinctrl-names = "default";
+ 
+ 	uart-has-rtscts;
+-	status = "okay";
++	status = "disabled";
+ };
+ #endif
+ 
+-- 
+2.25.1
+

@@ -1,0 +1,61 @@
+From 7d1f30f4ec1e6a4a1c12c3339dec543f253bdd4c Mon Sep 17 00:00:00 2001
+From: Cuong Doan <cuong.doan.ra@renesas.com>
+Date: Tue, 4 Jan 2022 16:18:01 +0700
+Subject: [PATCH] gstvspmfilter: Fix ISU limitation about stride alignment 32 &
+ address alignment 512.
+
+ISU driver has limitation (require stride algin 32 & address align 512),
+so vspmfiter only support decoding video stream with resolution satisfy:
+- Stride align 32.
+- Stride x height align 512.
+We need to round up its output stride to satisfy it.
+
+Signed-off-by: Cuong Doan <cuong.doan.ra@renesas.com>
+---
+ gstvspmfilter.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/gstvspmfilter.c b/gstvspmfilter.c
+index 18410f6..f0d9aad 100644
+--- a/gstvspmfilter.c
++++ b/gstvspmfilter.c
+@@ -60,6 +60,11 @@ GST_DEBUG_CATEGORY_EXTERN (GST_CAT_PERFORMANCE);
+ #define VSP_FORMAT_PIXEL_BIT	(8)
+ #define VSPM_BUFFERS	3
+ 
++/* ISU driver need an aligned 32 stride */
++#define ISU_STRIDE_ALIGN     (32)
++/* ISU driver need an aligned 512 physical address */
++#define ISU_ADDR_ALIGN       (512)
++
+ GType gst_vspm_filter_get_type (void);
+ 
+ static GQuark _colorspace_quark;
+@@ -503,6 +508,25 @@ gst_vspm_filter_set_info (GstVideoFilter * filter,
+           GST_VIDEO_FORMAT_INFO_SCALE_WIDTH (out_info->finfo, i,
+               out_info->width);
+ 
++      if (stride[i] % ISU_STRIDE_ALIGN) {
++        stride[i] = GST_ROUND_UP_32(stride[i]);
++      } else {
++        /* Do nothing */
++      }
++      if ((stride[i] * out_info->height) % ISU_ADDR_ALIGN) {
++        if (!(out_info->height % 8)) {
++          stride[i] = GST_ROUND_UP_64(stride[i]);
++        } else if (!(out_info->height % 4)) {
++          stride[i] = GST_ROUND_UP_128(stride[i]);
++        } else if (!(out_info->height % 2)) {
++          stride[i] = GST_ROUND_UP_N(stride[i], 256);
++        } else {
++          /* Do nothing */
++        }
++      } else {
++        /* Do nothing */
++      }
++
+       plane_size[i] = stride[i] *
+         GST_VIDEO_FORMAT_INFO_SCALE_HEIGHT (out_info->finfo, i, out_info->height);
+ 
+-- 
+2.17.1
