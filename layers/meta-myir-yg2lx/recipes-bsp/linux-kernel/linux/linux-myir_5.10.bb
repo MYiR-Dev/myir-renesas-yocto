@@ -15,11 +15,16 @@ COMPATIBLE_MACHINE_yg2lx = "(myir-yg2lx|myir-yg2lx-1g)"
 #      git://github.com/123markhong/yg2lx-kernel.git;protocol=https;branch=master"
 #SRCREV= "96c21b36384abbc828f93ae5ea3edb1e55210082"
 
-SRC_URI += "\
-      git://github.com/123markhong/myir-renesas-linux.git;protocol=https;branch=develop-rz-L5.10.83"
+#SRC_URI += "\
+#      git://github.com/123markhong/myir-renesas-linux.git;protocol=https;branch=develop-rz-L5.10.83"
 #SRCREV= "0218cba1bd7bf83c95fa7b942542d4251c6fe345"
 #SRCREV= "63e19f3ffb2ce335a11bfe057bd980a684629e34"
-SRCREV = "195975536df5cf843dbe9c629f73ef839b04a199"
+#SRCREV = "195975536df5cf843dbe9c629f73ef839b04a199"
+
+SRC_URI += "\
+      git://github.com/MYiR-Dev/myir-renesas-linux.git;protocol=https;branch=develop-rz-L5.10.83"
+SRCREV= "a42f9ad9078e442a26f89daf433ce9861c45444b"
+
 
 
 LINUX_VERSION = "5.10.83"
