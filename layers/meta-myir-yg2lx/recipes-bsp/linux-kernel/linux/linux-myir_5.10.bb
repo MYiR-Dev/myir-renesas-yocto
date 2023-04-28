@@ -23,7 +23,7 @@ COMPATIBLE_MACHINE_yg2lx = "(myir-yg2lx|myir-yg2lx-1g)"
 
 SRC_URI += "\
       git://github.com/MYiR-Dev/myir-renesas-linux.git;protocol=https;branch=develop-rz-L5.10.83"
-SRCREV= "a42f9ad9078e442a26f89daf433ce9861c45444b"
+SRCREV= "3c38edfeafb9d45e011433094c3f411c89241ebf"
 
 
 
