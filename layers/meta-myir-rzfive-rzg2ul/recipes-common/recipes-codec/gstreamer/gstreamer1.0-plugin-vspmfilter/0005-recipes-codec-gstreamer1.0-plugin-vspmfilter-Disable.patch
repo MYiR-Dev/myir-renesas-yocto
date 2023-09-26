@@ -1,0 +1,30 @@
+From a56a868c7018a4ee2acaa757c894872c6f0ab74c Mon Sep 17 00:00:00 2001
+From: Cuong Doan <cuong.doan.ra@renesas.com>
+Date: Wed, 23 Mar 2022 13:00:09 +0700
+Subject: [PATCH] recipes-codec: gstreamer1.0-plugin-vspmfilter: Disable
+ passthrough mode.
+
+This patch is for disable passthrough mode when same caps, so that
+vspmfilter can get the updated stride (Fix alignment) from gst-omx.
+
+Signed-off-by: Cuong Doan <cuong.doan.ra@renesas.com>
+---
+ gstvspmfilter.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gstvspmfilter.c b/gstvspmfilter.c
+index f0d9aad..de516c6 100644
+--- a/gstvspmfilter.c
++++ b/gstvspmfilter.c
+@@ -781,7 +781,7 @@ gst_vspm_filter_class_init (GstVspmFilterClass * klass)
+   gstbasetransform_class->transform_meta =
+       GST_DEBUG_FUNCPTR (gst_vspm_filter_transform_meta);
+ 
+-  gstbasetransform_class->passthrough_on_same_caps = TRUE;
++  gstbasetransform_class->passthrough_on_same_caps = FALSE;
+ 
+   gstbasetransform_class->prepare_output_buffer = 
+       GST_DEBUG_FUNCPTR (gst_vspm_filter_prepare_output_buffer);
+-- 
+2.17.1
+

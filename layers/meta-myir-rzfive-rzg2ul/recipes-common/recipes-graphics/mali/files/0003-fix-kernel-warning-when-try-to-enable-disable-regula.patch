@@ -1,0 +1,92 @@
+From 93ea35c3a987a78cea176264ed05b9caad3513ad Mon Sep 17 00:00:00 2001
+From: tuanquoctran <tuan.tran.zj@rvc.renesas.com>
+Date: Fri, 3 Mar 2023 13:01:41 +0700
+Subject: [PATCH] Fix underflow of regulator enable count warnings
+
+---
+ drivers/gpu/arm/midgard/mali_kbase_core_linux.c          | 9 ++++-----
+ drivers/gpu/arm/midgard/mali_kbase_defs.h                | 3 ++-
+ .../midgard/platform/devicetree/mali_kbase_runtime_pm.c  | 4 ++--
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/gpu/arm/midgard/mali_kbase_core_linux.c b/drivers/gpu/arm/midgard/mali_kbase_core_linux.c
+index f59c3a1..8de71e9 100644
+--- a/drivers/gpu/arm/midgard/mali_kbase_core_linux.c
++++ b/drivers/gpu/arm/midgard/mali_kbase_core_linux.c
+@@ -4504,9 +4504,8 @@ int power_control_init(struct kbase_device *kbdev)
+ 	unsigned int i;
+ #if defined(CONFIG_REGULATOR)
+ 	static const char * const regulator_names[] = {
+-		"mali", "shadercores"
++		"mali"
+ 	};
+-	BUILD_BUG_ON(ARRAY_SIZE(regulator_names) < BASE_MAX_NR_CLOCKS_REGULATORS);
+ #endif /* CONFIG_REGULATOR */
+ 
+ 	if (!kbdev)
+@@ -4522,7 +4521,7 @@ int power_control_init(struct kbase_device *kbdev)
+ 	 * Any other error is ignored and the driver will continue
+ 	 * operating with a partial initialization of regulators.
+ 	 */
+-	for (i = 0; i < BASE_MAX_NR_CLOCKS_REGULATORS; i++) {
++	for (i = 0; i < ARRAY_SIZE(regulator_names); i++) {
+ 		kbdev->regulators[i] = regulator_get_optional(kbdev->dev,
+ 			regulator_names[i]);
+ 		if (IS_ERR(kbdev->regulators[i])) {
+@@ -4532,7 +4531,7 @@ int power_control_init(struct kbase_device *kbdev)
+ 		}
+ 	}
+ 	if (err == -EPROBE_DEFER) {
+-		while (i > 0)
++		while ((i > 0) && (i < ARRAY_SIZE(regulator_names)))
+ 			regulator_put(kbdev->regulators[--i]);
+ 		return err;
+ 	}
+@@ -4621,7 +4620,7 @@ int power_control_init(struct kbase_device *kbdev)
+ #elif (KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE)
+ 	if (kbdev->nr_regulators > 0) {
+ 		kbdev->opp_table = dev_pm_opp_set_regulators(kbdev->dev,
+-			regulator_names, BASE_MAX_NR_CLOCKS_REGULATORS);
++			regulator_names, kbdev->nr_regulators);
+ 
+ 		if (IS_ERR(kbdev->opp_table)) {
+ 			err = PTR_ERR(kbdev->opp_table);
+diff --git a/drivers/gpu/arm/midgard/mali_kbase_defs.h b/drivers/gpu/arm/midgard/mali_kbase_defs.h
+index c0e1322..23abd56 100644
+--- a/drivers/gpu/arm/midgard/mali_kbase_defs.h
++++ b/drivers/gpu/arm/midgard/mali_kbase_defs.h
+@@ -148,7 +148,8 @@
+  * This is dependent on support for of_property_read_u64_array() in the
+  * kernel.
+  */
+-#define BASE_MAX_NR_CLOCKS_REGULATORS (2)
++#define BASE_MAX_NR_CLOCKS_REGULATORS (3)
++#define IS_REGULATOR_ALWAYS_ON (1)
+ 
+ /* Forward declarations */
+ struct kbase_context;
+diff --git a/drivers/gpu/arm/midgard/platform/devicetree/mali_kbase_runtime_pm.c b/drivers/gpu/arm/midgard/platform/devicetree/mali_kbase_runtime_pm.c
+index 295c90a..189cc07 100644
+--- a/drivers/gpu/arm/midgard/platform/devicetree/mali_kbase_runtime_pm.c
++++ b/drivers/gpu/arm/midgard/platform/devicetree/mali_kbase_runtime_pm.c
+@@ -34,7 +34,7 @@ static void enable_gpu_power_control(struct kbase_device *kbdev)
+ {
+ 	unsigned int i;
+ 
+-#if defined(CONFIG_REGULATOR)
++#if (defined(CONFIG_REGULATOR) && (!IS_REGULATOR_ALWAYS_ON))
+ 	for (i = 0; i < kbdev->nr_regulators; i++) {
+ 		if (WARN_ON(kbdev->regulators[i] == NULL))
+ 			;
+@@ -80,7 +80,7 @@ static void disable_gpu_power_control(struct kbase_device *kbdev)
+ 	};
+ 
+ 
+-#if defined(CONFIG_REGULATOR)
++#if (defined(CONFIG_REGULATOR) && (!IS_REGULATOR_ALWAYS_ON))
+ 	for (i = 0; i < kbdev->nr_regulators; i++) {
+ 		if (WARN_ON(kbdev->regulators[i] == NULL))
+ 			;
+-- 
+2.25.1
+

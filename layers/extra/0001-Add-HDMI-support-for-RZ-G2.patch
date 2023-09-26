@@ -1,0 +1,184 @@
+From e4f4850a95a837ae88ad65babdeeea39d1fba020 Mon Sep 17 00:00:00 2001
+From: hienhuynh <hien.huynh.px@renesas.com>
+Date: Sat, 26 Feb 2022 13:50:15 +0700
+Subject: [PATCH 1/4] Add HDMI support for RZ/G2
+
+This patch add HDMI support for RZ/G2 SoCs with:
+- Fix configuring HDMI registers in G2H/M/N.
+- Add interlace mode support for RK874 Rev.[D,E].
+
+Signed-off-by: hienhuynh <hien.huynh.px@renesas.com>
+---
+ ...-rcar-du-Fix-PHY-configure-registers.patch | 110 ++++++++++++++++++
+ ...dv7511-allow-support-interlaced-mode.patch |  28 +++++
+ .../linux/linux-renesas_5.10.bbappend         |   5 +
+ 3 files changed, 143 insertions(+)
+ create mode 100644 meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0001-drm-rcar-du-Fix-PHY-configure-registers.patch
+ create mode 100644 meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0002-drm-bridge-adv7511-allow-support-interlaced-mode.patch
+
+diff --git a/meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0001-drm-rcar-du-Fix-PHY-configure-registers.patch b/meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0001-drm-rcar-du-Fix-PHY-configure-registers.patch
+new file mode 100644
+index 00000000..b7641dfd
+--- /dev/null
++++ b/meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0001-drm-rcar-du-Fix-PHY-configure-registers.patch
+@@ -0,0 +1,110 @@
++From 9ddc57565a554fabc1c88bf4271a842568b8990c Mon Sep 17 00:00:00 2001
++From: Hien Huynh <hien.huynh.px@renesas.com>
++Date: Sat, 26 Feb 2022 13:38:30 +0700
++Subject: [PATCH 1/2] drm: rcar-du: Fix PHY configure registers
++
++By H/W manual update, the setting to PHY configure (0x17, 0x16, 0x06)
++through I2C is to recomended value.
++In addition, this patch sets PHY configure (0x09, 0x0e, 0x19)
++registers added by H/W manual update.
++
++Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
++---
++ drivers/gpu/drm/rcar-du/rcar_dw_hdmi.c | 52 ++++++++++++++++++++++----
++ 1 file changed, 44 insertions(+), 8 deletions(-)
++
++diff --git a/drivers/gpu/drm/rcar-du/rcar_dw_hdmi.c b/drivers/gpu/drm/rcar-du/rcar_dw_hdmi.c
++index 7b8ec8310699..826247d53144 100644
++--- a/drivers/gpu/drm/rcar-du/rcar_dw_hdmi.c
+++++ b/drivers/gpu/drm/rcar-du/rcar_dw_hdmi.c
++@@ -15,9 +15,18 @@
++ #include <drm/drm_modes.h>
++ 
++ #define RCAR_HDMI_PHY_OPMODE_PLLCFG	0x06	/* Mode of operation and PLL dividers */
+++
+++/* Clock Symbol and Transmitter Control Register */
+++#define RCAR_HDMI_PHY_CKSYMTXCTRL	0x09
+++
+++/* Voltage Level Control Register */
+++#define RCAR_HDMI_PHY_VLEVCTRL		0x0e
++ #define RCAR_HDMI_PHY_PLLCURRGMPCTRL	0x10	/* PLL current and Gmp (conductance) */
++ #define RCAR_HDMI_PHY_PLLDIVCTRL	0x11	/* PLL dividers */
++ 
+++/* Transmission Termination Register */
+++#define RCAR_HDMI_PHY_TXTERM		0x19
+++
++ struct rcar_hdmi_phy_params {
++ 	unsigned long mpixelclock;
++ 	u16 opmode_div;	/* Mode of operation and PLL dividers */
++@@ -25,15 +34,22 @@ struct rcar_hdmi_phy_params {
++ 	u16 div;	/* PLL dividers */
++ };
++ 
+++struct rcar_hdmi_phy_params_2 {
+++	unsigned long mpixelclock;
+++	u16 clk;	/* Clock Symbol and Transmitter Control Register */
+++	u16 vol_level;	/* Voltage Level */
+++	u16 trans;	/* Transmission Termination Register */
+++};
+++
++ static const struct rcar_hdmi_phy_params rcar_hdmi_phy_params[] = {
++-	{ 35500000,  0x0003, 0x0344, 0x0328 },
++-	{ 44900000,  0x0003, 0x0285, 0x0128 },
++-	{ 71000000,  0x0002, 0x1184, 0x0314 },
++-	{ 90000000,  0x0002, 0x1144, 0x0114 },
++-	{ 140250000, 0x0001, 0x20c4, 0x030a },
++-	{ 182750000, 0x0001, 0x2084, 0x010a },
++-	{ 281250000, 0x0000, 0x0084, 0x0305 },
++-	{ 297000000, 0x0000, 0x0084, 0x0105 },
+++	{ 35500000,  0x0003, 0x0283, 0x0628 },
+++	{ 44900000,  0x0003, 0x0285, 0x0228 },
+++	{ 71000000,  0x0002, 0x1183, 0x0614 },
+++	{ 90000000,  0x0002, 0x1142, 0x0214 },
+++	{ 140250000, 0x0001, 0x20c0, 0x060a },
+++	{ 182750000, 0x0001, 0x2080, 0x020a },
+++	{ 281250000, 0x0000, 0x3040, 0x0605 },
+++	{ 297000000, 0x0000, 0x3041, 0x0205 },
++ 	{ ~0UL,      0x0000, 0x0000, 0x0000 },
++ };
++ 
++@@ -52,10 +68,17 @@ rcar_hdmi_mode_valid(struct dw_hdmi *hdmi, void *data,
++ 	return MODE_OK;
++ }
++ 
+++static const struct rcar_hdmi_phy_params_2 rcar_hdmi_phy_params_2[] = {
+++	{ 165000000,  0x8c88, 0x0180, 0x0007},
+++	{ 297000000,  0x83c8, 0x0180, 0x0004},
+++	{ ~0UL,       0x0000, 0x0000, 0x0000},
+++};
+++
++ static int rcar_hdmi_phy_configure(struct dw_hdmi *hdmi, void *data,
++ 				   unsigned long mpixelclock)
++ {
++ 	const struct rcar_hdmi_phy_params *params = rcar_hdmi_phy_params;
+++	const struct rcar_hdmi_phy_params_2 *params_2 = rcar_hdmi_phy_params_2;
++ 
++ 	for (; params->mpixelclock != ~0UL; ++params) {
++ 		if (mpixelclock <= params->mpixelclock)
++@@ -71,6 +94,19 @@ static int rcar_hdmi_phy_configure(struct dw_hdmi *hdmi, void *data,
++ 			      RCAR_HDMI_PHY_PLLCURRGMPCTRL);
++ 	dw_hdmi_phy_i2c_write(hdmi, params->div, RCAR_HDMI_PHY_PLLDIVCTRL);
++ 
+++	for (; params_2->mpixelclock != ~0UL; ++params_2) {
+++		if (mpixelclock <= params_2->mpixelclock)
+++			break;
+++	}
+++
+++	if (params_2->mpixelclock == ~0UL)
+++		return -EINVAL;
+++
+++	dw_hdmi_phy_i2c_write(hdmi, params_2->clk, RCAR_HDMI_PHY_CKSYMTXCTRL);
+++	dw_hdmi_phy_i2c_write(hdmi, params_2->vol_level,
+++			      RCAR_HDMI_PHY_VLEVCTRL);
+++	dw_hdmi_phy_i2c_write(hdmi, params_2->trans, RCAR_HDMI_PHY_TXTERM);
+++
++ 	return 0;
++ }
++ 
++-- 
++2.17.1
++
+diff --git a/meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0002-drm-bridge-adv7511-allow-support-interlaced-mode.patch b/meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0002-drm-bridge-adv7511-allow-support-interlaced-mode.patch
+new file mode 100644
+index 00000000..d827c4a9
+--- /dev/null
++++ b/meta-rzg2h/recipes-kernel/linux/linux-renesas/hdmi_patches/0002-drm-bridge-adv7511-allow-support-interlaced-mode.patch
+@@ -0,0 +1,28 @@
++From 6abd71474677f223192ef60b94bb68a319735044 Mon Sep 17 00:00:00 2001
++From: Hien Huynh <hien.huynh.px@renesas.com>
++Date: Mon, 28 Dec 2020 13:26:41 +0700
++Subject: [PATCH 2/2] drm: bridge: adv7511: allow support interlaced mode
++
++This commit is created to allow adv7511 support interlaced mode.
++
++Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
++---
++ drivers/gpu/drm/bridge/adv7511/adv7511_drv.c | 2 ++
++ 1 file changed, 2 insertions(+)
++
++diff --git a/drivers/gpu/drm/bridge/adv7511/adv7511_drv.c b/drivers/gpu/drm/bridge/adv7511/adv7511_drv.c
++index a0d392c338da..2f76661ae4fd 100644
++--- a/drivers/gpu/drm/bridge/adv7511/adv7511_drv.c
+++++ b/drivers/gpu/drm/bridge/adv7511/adv7511_drv.c
++@@ -846,6 +846,8 @@ static int adv7511_connector_init(struct adv7511 *adv)
++ 		return -ENODEV;
++ 	}
++ 
+++	adv->connector.interlace_allowed = 1;
+++
++ 	if (adv->i2c_main->irq)
++ 		adv->connector.polled = DRM_CONNECTOR_POLL_HPD;
++ 	else
++-- 
++2.17.1
++
+diff --git a/meta-rzg2h/recipes-kernel/linux/linux-renesas_5.10.bbappend b/meta-rzg2h/recipes-kernel/linux/linux-renesas_5.10.bbappend
+index dd887dda..39ad551a 100644
+--- a/meta-rzg2h/recipes-kernel/linux/linux-renesas_5.10.bbappend
++++ b/meta-rzg2h/recipes-kernel/linux/linux-renesas_5.10.bbappend
+@@ -37,3 +37,8 @@ do_download_firmware () {
+        install -m 755 ${WORKDIR}/TIInit_11.8.32.bts ${FIRMWARE_DIR}/ti-connectivity
+ }
+ addtask do_download_firmware after do_configure before do_compile
++
++SRC_URI_append = " \
++	file://hdmi_patches/0001-drm-rcar-du-Fix-PHY-configure-registers.patch \
++	file://hdmi_patches/0002-drm-bridge-adv7511-allow-support-interlaced-mode.patch \
++"
+-- 
+2.25.1
+

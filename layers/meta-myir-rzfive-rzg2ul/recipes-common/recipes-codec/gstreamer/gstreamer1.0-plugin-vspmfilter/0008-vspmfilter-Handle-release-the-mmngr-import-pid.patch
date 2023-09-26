@@ -1,0 +1,121 @@
+From ef867461490c40a35e408e60262068ccb72b8c2a Mon Sep 17 00:00:00 2001
+From: Huynh Thanh Hung <hung.huynh.wz@renesas.com>
+Date: Thu, 24 Nov 2022 19:04:51 +0700
+Subject: [PATCH] vspmfilter: Handle release the mmngr import pid
+
+Previous implement may leak the import pid, this commit will prevent it.
+
+Signed-off-by: Huynh Thanh Hung <hung.huynh.wz@renesas.com>
+---
+ gstvspmfilter.c | 31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
+
+diff --git a/gstvspmfilter.c b/gstvspmfilter.c
+index 96cfe42..8a2146d 100644
+--- a/gstvspmfilter.c
++++ b/gstvspmfilter.c
+@@ -695,6 +695,8 @@ gst_vspmfilter_change_state (GstElement * element, GstStateChange transition)
+         gst_object_unref (space->out_port_pool);
+         space->out_port_pool = NULL;
+       }
++      /* Release the importing to avoid leak FD */
++      gst_vspm_filter_release_fd (space->mmngr_import_list);
+       break;
+     default:
+       break;
+@@ -1131,13 +1133,15 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+     irc = set_colorspace (GST_VIDEO_FRAME_FORMAT (in_frame), &vsp_info->in_format, &vsp_info->in_swapbit);
+     if (irc != 0) {
+       GST_ERROR("input format is non-support.\n");
+-      return GST_FLOW_ERROR;
++      ret = GST_FLOW_ERROR;
++      goto err;
+     }
+ 
+     irc = set_colorspace (GST_VIDEO_FRAME_FORMAT (out_frame), &vsp_info->out_format, &vsp_info->out_swapbit);
+     if (irc != 0) {
+       GST_ERROR("output format is non-support.\n");
+-      return GST_FLOW_ERROR;
++      ret = GST_FLOW_ERROR;
++      goto err;
+     }
+     vsp_info->format_flag = 1;
+   }
+@@ -1178,7 +1182,8 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+       } else {
+         /* We can not find the exactly address for plane 2, return as error */
+         GST_ERROR("Can not find physical address of input buffer for planar 2\n");
+-	return GST_FLOW_ERROR;
++        ret = GST_FLOW_ERROR;
++        goto err;
+       }
+     }
+   }
+@@ -1194,14 +1199,15 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+       } else {
+         GST_ERROR("Can not find physical address of output buffer for planar 2\n");
+         /* We can not find the exactly address for plane 2, return as error */
+-	return GST_FLOW_ERROR;
++        ret = GST_FLOW_ERROR;
++        goto err;
+       }
+     }
+   }
+ 
+   if (in_n_planes >= 3 || out_n_planes >= 3) {
+     GST_ERROR("does not support number plane >= 3\n");
+-    return GST_FLOW_ERROR;
++    goto err;
+   }
+ 
+   if (!src_addr[0] || !dst_addr[0] ||
+@@ -1210,7 +1216,8 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+     /* W/A: Sometimes we can not convert virtual address to physical address,
+      * we should skip this frame to avoid issue with HW processor.
+      */
+-    return GST_FLOW_OK;
++    ret = GST_FLOW_OK;
++    goto err;
+   }
+ 
+   {
+@@ -1228,7 +1235,8 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+     rs_par.y_ratio          = (unsigned short)( (in_height << 12) / out_height );
+     if (!(rs_par.x_ratio & 0x0000F000) || !(rs_par.y_ratio & 0x0000F000)) {
+ 	GST_ERROR("does not support scale up.\n");
+-        return GST_FLOW_ERROR;
++        ret = GST_FLOW_ERROR;
++        goto err;
+     }
+   }
+ 
+@@ -1335,10 +1343,9 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+   ercd = VSPM_lib_Entry(vsp_info->vspm_handle, &vsp_info->jobid, 126, &vspm_ip, (unsigned long)&space->smp_wait, cb_func);
+ 
+   if (ercd) {
+-    /* In-case can not process VSPM, we still need release the importing */
+-    gst_vspm_filter_release_fd (space->mmngr_import_list);
+     printf("VSPM_lib_Entry() Failed!! ercd=%ld\n", ercd);
+-    return GST_FLOW_ERROR;
++    ret = GST_FLOW_ERROR;
++    goto err;
+   }
+ 
+   /* Wait for callback */
+@@ -1347,10 +1354,12 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+     out_frame = NULL;
+   }
+ 
++  ret = GST_FLOW_OK;
++err:
+   /* Release the importing to avoid leak FD */
+   gst_vspm_filter_release_fd (space->mmngr_import_list);
+ 
+-  return GST_FLOW_OK;
++  return ret;
+ }
+ 
+ static gboolean
+-- 
+2.17.1
+

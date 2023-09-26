@@ -1,0 +1,67 @@
+From 35852a7f8ca6c52f569b55bcd2a3fe45d7a4b165 Mon Sep 17 00:00:00 2001
+From: Canh Dao <canh.dao.ct@renesas.com>
+Date: Thu, 14 Apr 2022 00:01:49 +0700
+Subject: [PATCH 1/2] arm64: dts: renesas: rzg2ul-smarc: Add uio support for 
+ inter processor communication
+
+---
+ arch/arm64/boot/dts/renesas/rzg2ul-smarc.dtsi | 43 +++++++++++++++++++
+ 1 file changed, 43 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/renesas/rzg2ul-smarc.dtsi b/arch/arm64/boot/dts/renesas/rzg2ul-smarc.dtsi
+index d3c277dacb3c..a96865605638 100644
+--- a/arch/arm64/boot/dts/renesas/rzg2ul-smarc.dtsi
++++ b/arch/arm64/boot/dts/renesas/rzg2ul-smarc.dtsi
+@@ -134,6 +134,49 @@ vccq_sdhi1: regulator-vccq-sdhi1 {
+ 		states = <3300000 1
+ 			  1800000 0>;
+ 	};
++	vring-ctl0@43000000 {
++		compatible = "vring_uio";
++		reg = <0x0 0x43000000 0x0 0x100000>;
++		no-map;
++	};
++
++	vring-ctl1@43100000 {
++		compatible = "vring_uio";
++		reg = <0x0 0x43100000 0x0 0x100000>;
++		no-map;
++	};
++
++	vring-shm0@43200000 {
++		compatible = "shm_uio";
++		reg = <0x0 0x43200000 0x0 0x300000>;
++		no-map;
++	};
++
++	vring-shm1@43500000 {
++		compatible = "shm_uio";
++		reg = <0x0 0x43500000 0x0 0x300000>;
++		no-map;
++	};
++
++	rsctbl@42f00000 {
++		compatible = "shm_uio";
++		reg = <0x0 0x42f00000 0x0 0x1000>;
++		no-map;
++	};
++
++	mhu-shm@42f01000 {
++		compatible = "shm_uio";
++		reg = <0x0 0x42f01000 0x0 0x1000>;
++		no-map;
++	};
++
++	mbox-uio@10400000 {
++		compatible = "mbox_uio";
++		reg = <0x0 0x10400000 0x0 0x1000>;
++		interrupt-parent = <&gic>;
++		interrupts = <GIC_SPI 75 IRQ_TYPE_LEVEL_HIGH>;
++		status = "okay";
++	};
+ 
+ 	x1_clk: x1-clock {
+ 		compatible = "fixed-clock";
+-- 
+2.25.1
+

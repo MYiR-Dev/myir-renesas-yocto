@@ -1,0 +1,11 @@
+[console_scripts]
+mxdev = mxdev.main:main
+
+[mxdev.workingcopytypes]
+bzr = mxdev.vcs.bazaar:BazaarWorkingCopy
+darcs = mxdev.vcs.darcs:DarcsWorkingCopy
+fs = mxdev.vcs.filesystem:FilesystemWorkingCopy
+git = mxdev.vcs.git:GitWorkingCopy
+gitsvn = mxdev.vcs.gitsvn:GitSVNWorkingCopy
+hg = mxdev.vcs.mercurial:MercurialWorkingCopy
+svn = mxdev.vcs.svn:SVNWorkingCopy

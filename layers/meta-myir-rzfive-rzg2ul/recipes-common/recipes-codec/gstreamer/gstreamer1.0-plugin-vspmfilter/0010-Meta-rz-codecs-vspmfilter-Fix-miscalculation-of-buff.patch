@@ -1,0 +1,117 @@
+From 81358e57043bedcb59de35e9f25983739de730d9 Mon Sep 17 00:00:00 2001
+From: Kiet Pham <kiet.pham.xb@renesas.com>
+Date: Tue, 7 Mar 2023 15:58:21 +0700
+Subject: [PATCH] Meta-rz-codecs: vspmfilter: Fix miscalculation of buffer size
+
+In normal case, output frame width is equal output stride. vspmfilter
+running flow will be showed below:
+    (1) Allocate output buffer-array (buffer-array from now) -> create
+    buffer pool -> push buffer-array to queue.
+    (2) Frame n: vspmfilter pops buffer from queue -> transform frame
+    -> push last buffer (buffer n-1) to queue -> assign buffer n
+    as last buffer.
+
+The issue happens when output frame width does not align with 32, at
+(1), vspmfilter needs to round up stride and allocate buffer array
+following that stride. Then it creates buffer pool, which contains
+buffer information. However, vspmfilter recalculates buffer size
+(without rounding up stride) instead referring from buffer-array.
+Because size of buffer-array is difference from buffer size in buffer
+pool, buffer-array will not be pushed to queue. The vspmfilter running
+flow in this case will be showed below:
+    (1) Allocate buffer-array -> create buffer pool.
+    (2) Frame 1: vspmfilter gets buffer 1 from buffer-array -> transform
+    frame (correct size) -> assign buffer 1 as last buffer.
+    (3) Frame 2: vspmfilter gets buffer 2 from output-buffer array ->
+    transfrom frame (correct size) -> resize last buffer (buffer 1)
+    (incorrect size) -> push last buffer to queue (buffer 1) ->
+    assign buffer 2 as last buffer.
+    (4) Frame n (n > 2): buffer pool pops buffer from queue -> transform
+    frame -> resize last buffer (buffer n-1) -> push last buffer to
+    queue -> assign buffer n as last buffer
+
+This issue causes phenomenon that only first 2 frames are correct.
+
+Solution: vspmfilter refers size from buffer-array when configure settings
+for buffer pool. Then, it does not need to recalculate buffer size for
+buffer pool -> remove recalculating function - gst_vspmfilter_buffer_pool_set_config
+
+Signed-off-by: Kiet Pham <kiet.pham.xb@renesas.com>
+---
+ gstvspmfilter.c | 46 +---------------------------------------------
+ 1 file changed, 1 insertion(+), 45 deletions(-)
+
+diff --git a/gstvspmfilter.c b/gstvspmfilter.c
+index e93a924..27b806d 100644
+--- a/gstvspmfilter.c
++++ b/gstvspmfilter.c
+@@ -142,49 +142,6 @@ enum
+   PROP_VSPM_DMABUF
+ };
+ 
+-static gboolean
+-gst_vspmfilter_buffer_pool_set_config (GstBufferPool * pool, GstStructure * config)
+-{
+-  GstVspmFilterBufferPool *vspmfltpool = GST_VSPMFILTER_BUFFER_POOL_CAST (pool);
+-  GstCaps *caps;
+-  gint width, height;
+-  guint size = 0;
+-  guint min_buffers;
+-  guint max_buffers;
+-  GstVideoInfo info;
+-  gint stride[GST_VIDEO_MAX_PLANES] = { 0 };
+-  guint i;
+-
+-  if (!gst_buffer_pool_config_get_params (config, &caps, NULL, &min_buffers,
+-          &max_buffers)) {
+-    GST_WARNING_OBJECT (pool, "invalid config");
+-    return FALSE;
+-  }
+-
+-  if (!gst_video_info_from_caps (&info, caps)) {
+-    GST_WARNING_OBJECT (pool, "failed getting video info from caps %"
+-        GST_PTR_FORMAT, caps);
+-    return FALSE;
+-  }
+-
+-  width = GST_VIDEO_INFO_WIDTH (&info);
+-  height = GST_VIDEO_INFO_HEIGHT (&info);
+-  
+-  for (i=0; i < GST_VIDEO_FORMAT_INFO_N_PLANES(info.finfo); i++) {
+-    stride[i] = GST_VIDEO_FORMAT_INFO_PSTRIDE(info.finfo, i) *
+-                  GST_VIDEO_FORMAT_INFO_SCALE_WIDTH (info.finfo, i, width);
+-    size += stride[i] *
+-      GST_VIDEO_FORMAT_INFO_SCALE_HEIGHT (info.finfo, i, height);
+-  }
+-
+-  gst_buffer_pool_config_set_params (config, caps, size, min_buffers,
+-      max_buffers);
+-  vspmfltpool->caps = gst_caps_ref (caps);
+-
+-  return GST_BUFFER_POOL_CLASS (gst_vspmfilter_buffer_pool_parent_class)->set_config
+-      (pool, config);
+-}
+-
+ static void
+ gst_vspmfilter_buffer_pool_free_buffer (GstBufferPool * bpool, GstBuffer * buffer)
+ {
+@@ -252,7 +209,6 @@ gst_vspmfilter_buffer_pool_class_init (GstVspmFilterBufferPoolClass * klass)
+ 
+   gobject_class->finalize = gst_vspmfilter_buffer_pool_finalize;
+   gstbufferpool_class->alloc_buffer = gst_vspmfilter_buffer_pool_alloc_buffer;
+-  gstbufferpool_class->set_config = gst_vspmfilter_buffer_pool_set_config;
+   gstbufferpool_class->free_buffer = gst_vspmfilter_buffer_pool_free_buffer;
+ }
+ 
+@@ -627,7 +583,7 @@ gst_vspm_filter_set_info (GstVideoFilter * filter,
+     space->out_port_pool = gst_vspmfilter_buffer_pool_new (space);
+ 
+     structure = gst_buffer_pool_get_config (space->out_port_pool);
+-    gst_buffer_pool_config_set_params (structure, outcaps, out_info->size, MAX_BUFFER, MAX_BUFFER);
++    gst_buffer_pool_config_set_params (structure, outcaps, size, MAX_BUFFER, MAX_BUFFER);
+     if (!gst_buffer_pool_set_config (space->out_port_pool, structure)) {
+         GST_WARNING_OBJECT (space, "failed to set buffer pool configuration");
+     }
+-- 
+2.25.1
+

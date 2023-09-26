@@ -1,0 +1,32 @@
+From 6a704f56814408b41bf1569ef6a3fd1b991069dc Mon Sep 17 00:00:00 2001
+From: Nhat Thieu <nhat.thieu.xr@renesas.com>
+Date: Fri, 25 Nov 2022 08:55:59 +0700
+Subject: [PATCH] Change default format to ISU_YUV420_NV12
+
+---
+ gstvspmfilter.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gstvspmfilter.c b/gstvspmfilter.c
+index 8a2146d..e93a924 100644
+--- a/gstvspmfilter.c
++++ b/gstvspmfilter.c
+@@ -422,6 +422,7 @@ struct extensions_t
+  *     set_colorspace) because current system use Little Endian */
+ 
+ static const struct extensions_t exts[] = {
++  {GST_VIDEO_FORMAT_NV12,       ISU_YUV420_NV12,ISU_SWAP_NO},
+   {GST_VIDEO_FORMAT_RGB16,      ISU_RGB565,     ISU_SWAP_B},
+   {GST_VIDEO_FORMAT_RGB,        ISU_RGB888,     ISU_SWAP_NO},
+   {GST_VIDEO_FORMAT_BGR,        ISU_BGR888,     ISU_SWAP_NO},
+@@ -436,7 +437,6 @@ static const struct extensions_t exts[] = {
+   {GST_VIDEO_FORMAT_UYVY,       ISU_YUV422_UYVY,ISU_SWAP_NO},
+   {GST_VIDEO_FORMAT_YUY2,       ISU_YUV422_YUY2,ISU_SWAP_NO},
+   {GST_VIDEO_FORMAT_NV16,       ISU_YUV422_NV16,ISU_SWAP_NO},
+-  {GST_VIDEO_FORMAT_NV12,       ISU_YUV420_NV12,ISU_SWAP_NO},
+   {GST_VIDEO_FORMAT_GRAY8,      ISU_RAW8,       ISU_SWAP_NO},
+ };
+ 
+-- 
+2.25.1
+

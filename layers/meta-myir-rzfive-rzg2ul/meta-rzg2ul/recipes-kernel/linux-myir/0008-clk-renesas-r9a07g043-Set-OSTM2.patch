@@ -1,0 +1,24 @@
+From ec4b4a5b0bbb140ff2751982477d3ba8bc7b7c50 Mon Sep 17 00:00:00 2001
+From: Minh Nguyen <minh.nguyen.zj@renesas.com>
+Date: Fri, 27 May 2022 21:58:06 +0700
+Subject: [PATCH] clk: renesas: r9a07g043: Set OSTM2 as critical clock
+
+---
+ drivers/clk/renesas/r9a07g043-cpg.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/clk/renesas/r9a07g043-cpg.c b/drivers/clk/renesas/r9a07g043-cpg.c
+index dad498e1b0693..296923ad08f1f 100644
+--- a/drivers/clk/renesas/r9a07g043-cpg.c
++++ b/drivers/clk/renesas/r9a07g043-cpg.c
+@@ -399,6 +399,7 @@ static const unsigned int r9a07g043_crit_mod_clks[] __initconst = {
+ 	MOD_CLK_BASE + R9A07G043_IA55_PCLK,
+ 	MOD_CLK_BASE + R9A07G043_IA55_CLK,
+ 	MOD_CLK_BASE + R9A07G043_DMAC_ACLK,
++        MOD_CLK_BASE + R9A07G043_OSTM2_PCLK,
+ };
+ 
+ const struct rzg2l_cpg_info r9a07g043_cpg_info = {
+-- 
+2.17.1
+

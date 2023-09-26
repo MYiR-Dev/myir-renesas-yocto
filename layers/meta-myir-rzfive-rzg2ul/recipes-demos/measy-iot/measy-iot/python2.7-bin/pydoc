@@ -1,0 +1,5 @@
+#!/home/hjx/renesas/tools/extend-tools/Python-2.7.13/build-install/bin/python2.7
+
+import pydoc
+if __name__ == '__main__':
+    pydoc.cli()

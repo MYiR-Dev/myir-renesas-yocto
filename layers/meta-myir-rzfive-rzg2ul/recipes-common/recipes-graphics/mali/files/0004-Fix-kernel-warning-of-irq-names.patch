@@ -1,0 +1,32 @@
+From 4c5e774299c3efde884483c46f34d40e33289d50 Mon Sep 17 00:00:00 2001
+From: Sang Ngo <sang.ngo.yf@renesas.com>
+Date: Thu, 1 Dec 2022 11:17:40 +0700
+Subject: [PATCH] Fix kernel warning of irq names
+
+Because DDK r40 uses platform_get_irq_byname to check irq names for upper and lower name cases, this causes warning for upper if using lower
+Solution: Change platform_get_irq_byname to platform_get_irq_byname_optional
+
+Signed-off-by: Sang Ngo <sang.ngo.yf@renesas.com>
+---
+ drivers/gpu/arm/midgard/mali_kbase_core_linux.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/arm/midgard/mali_kbase_core_linux.c b/drivers/gpu/arm/midgard/mali_kbase_core_linux.c
+index 6226509..fbcd185 100644
+--- a/drivers/gpu/arm/midgard/mali_kbase_core_linux.c
++++ b/drivers/gpu/arm/midgard/mali_kbase_core_linux.c
+@@ -454,9 +454,9 @@ int assign_irqs(struct kbase_device *kbdev)
+ 		 * first then try using Lower case names. If both attempts fail then
+ 		 * we assume there is no IRQ resource specified for the GPU.
+ 		 */
+-		irq = platform_get_irq_byname(pdev, irq_names_caps[i]);
++		irq = platform_get_irq_byname_optional(pdev, irq_names_caps[i]);
+ 		if (irq < 0)
+-			irq = platform_get_irq_byname(pdev, irq_names[i]);
++			irq = platform_get_irq_byname_optional(pdev, irq_names[i]);
+ #else
+ 		irq = platform_get_irq(pdev, i);
+ #endif /* CONFIG_OF */
+-- 
+2.25.1
+

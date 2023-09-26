@@ -1,0 +1,36 @@
+From 9676046f9885db5f169626d1c3fe1586d628af9b Mon Sep 17 00:00:00 2001
+From: Huynh Thanh Hung <hung.huynh.wz@renesas.com>
+Date: Mon, 14 Nov 2022 14:43:15 +0700
+Subject: [PATCH 6/7] vspmfilter: Skip the frame if physical address is NULL
+
+When can not get physical address of any planar, we should skip the
+frame in order not to get the issue with HW processor.
+
+Signed-off-by: Huynh Thanh Hung <hung.huynh.wz@renesas.com>
+---
+ gstvspmfilter.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/gstvspmfilter.c b/gstvspmfilter.c
+index de516c6..ace41bd 100644
+--- a/gstvspmfilter.c
++++ b/gstvspmfilter.c
+@@ -1134,6 +1134,15 @@ gst_vspm_filter_transform_frame (GstVideoFilter * filter,
+     return GST_FLOW_ERROR;
+   }
+ 
++  if (!src_addr[0] || !dst_addr[0] ||
++      (in_n_planes >= 2 && !src_addr[1]) ||
++      (out_n_planes >=2 && !dst_addr[1])) {
++    /* W/A: Sometimes we can not convert virtual address to physical address,
++     * we should skip this frame to avoid issue with HW processor.
++     */
++    return GST_FLOW_OK;
++  }
++
+   {
+     /* set resize parameter */
+     memset(&rs_par, 0, sizeof(T_ISU_RS));
+-- 
+2.17.1
+

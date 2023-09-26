@@ -1,0 +1,126 @@
+From 7cbeb671066aca3222fc243592c34b989e3a1815 Mon Sep 17 00:00:00 2001
+From: Hien Huynh <hien.huynh.px@renesas.com>
+Date: Mon, 3 Apr 2023 18:02:56 +0700
+Subject: [PATCH] dynamic-layers: virtualization-layer: add WA to remove
+ network-online.target as previous dependency
+
+Add Workaround to remove network-online.target as previous dependency
+for connman-wait-online.service and connman-wait-online.service to
+prevent them from waiting too long for online network.
+This wait can affect to other system services.
+
+Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
+---
+ ...ine.service-WA-to-remove-previous-de.patch | 32 +++++++++++++++++
+ .../connman/connman_1.37.bbappend             |  5 +++
+ ...-wait-online.service-WA-remove-netwo.patch | 34 +++++++++++++++++++
+ .../systemd/systemd_244.5.bbappend            |  5 +++
+ 4 files changed, 76 insertions(+)
+ create mode 100644 meta-rz-common/dynamic-layers/virtualization-layer/connman/connman/0001-connman-wait-online.service-WA-to-remove-previous-de.patch
+ create mode 100644 meta-rz-common/dynamic-layers/virtualization-layer/connman/connman_1.37.bbappend
+ create mode 100644 meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd/0001-systemd-networkd-wait-online.service-WA-remove-netwo.patch
+ create mode 100644 meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd_244.5.bbappend
+
+diff --git a/meta-rz-common/dynamic-layers/virtualization-layer/connman/connman/0001-connman-wait-online.service-WA-to-remove-previous-de.patch b/meta-rz-common/dynamic-layers/virtualization-layer/connman/connman/0001-connman-wait-online.service-WA-to-remove-previous-de.patch
+new file mode 100644
+index 00000000..c2bcfc30
+--- /dev/null
++++ b/meta-rz-common/dynamic-layers/virtualization-layer/connman/connman/0001-connman-wait-online.service-WA-to-remove-previous-de.patch
+@@ -0,0 +1,32 @@
++From bf777e68c22dd1d13b232c4705cef8a694327f5c Mon Sep 17 00:00:00 2001
++From: Hien Huynh <hien.huynh.px@renesas.com>
++Date: Mon, 3 Apr 2023 17:50:13 +0700
++Subject: [PATCH] connman-wait-online.service: WA to remove previous dependency
++
++Workaround to remove previous dependency (network-online.target) of
++connman-wait-online.service.
++connman-wait-online.service has to wait for finishing of
++network-online.target. But if no network is available, it has to wait
++too long and affect to other system services.
++
++Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
++---
++ src/connman-wait-online.service.in | 2 +-
++ 1 file changed, 1 insertion(+), 1 deletion(-)
++
++diff --git a/src/connman-wait-online.service.in b/src/connman-wait-online.service.in
++index c2ad5cc..90127ce 100644
++--- a/src/connman-wait-online.service.in
+++++ b/src/connman-wait-online.service.in
++@@ -2,7 +2,7 @@
++ Description=Wait for network to be configured by ConnMan
++ Requisite=connman.service
++ After=connman.service
++-Before=network-online.target
+++#Before=network-online.target
++ DefaultDependencies=no
++ Conflicts=shutdown.target
++ 
++-- 
++2.25.1
++
+diff --git a/meta-rz-common/dynamic-layers/virtualization-layer/connman/connman_1.37.bbappend b/meta-rz-common/dynamic-layers/virtualization-layer/connman/connman_1.37.bbappend
+new file mode 100644
+index 00000000..4c2f8880
+--- /dev/null
++++ b/meta-rz-common/dynamic-layers/virtualization-layer/connman/connman_1.37.bbappend
+@@ -0,0 +1,5 @@
++FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}/:"
++
++SRC_URI += " \
++	file://0001-connman-wait-online.service-WA-to-remove-previous-de.patch \
++"
+diff --git a/meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd/0001-systemd-networkd-wait-online.service-WA-remove-netwo.patch b/meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd/0001-systemd-networkd-wait-online.service-WA-remove-netwo.patch
+new file mode 100644
+index 00000000..6e38ac9c
+--- /dev/null
++++ b/meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd/0001-systemd-networkd-wait-online.service-WA-remove-netwo.patch
+@@ -0,0 +1,34 @@
++From 1fba6af6f208e15610cb59d8450b5abbba03833e Mon Sep 17 00:00:00 2001
++From: Hien Huynh <hien.huynh.px@renesas.com>
++Date: Mon, 3 Apr 2023 17:59:53 +0700
++Subject: [PATCH] systemd-networkd-wait-online.service: WA remove
++ network-online as previous dependency
++
++Workaround to remove network-online as previous dependency
++of systemd-networkd-wait-online.service.
++Network-online can make systemd-networkd-wait-online wait too long
++to check online status if no network is available.
++It can affect to other system services.
++
++Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
++---
++ units/systemd-networkd-wait-online.service.in | 3 ++-
++ 1 file changed, 2 insertions(+), 1 deletion(-)
++
++diff --git a/units/systemd-networkd-wait-online.service.in b/units/systemd-networkd-wait-online.service.in
++index 7666e16669..54cddf5b8c 100644
++--- a/units/systemd-networkd-wait-online.service.in
+++++ b/units/systemd-networkd-wait-online.service.in
++@@ -14,7 +14,8 @@ DefaultDependencies=no
++ Conflicts=shutdown.target
++ Requires=systemd-networkd.service
++ After=systemd-networkd.service
++-Before=network-online.target shutdown.target
+++#Before=network-online.target shutdown.target
+++Before=shutdown.target
++ 
++ [Service]
++ Type=oneshot
++-- 
++2.25.1
++
+diff --git a/meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd_244.5.bbappend b/meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd_244.5.bbappend
+new file mode 100644
+index 00000000..0caa2ffb
+--- /dev/null
++++ b/meta-rz-common/dynamic-layers/virtualization-layer/systemd/systemd_244.5.bbappend
+@@ -0,0 +1,5 @@
++FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}/:"
++
++SRC_URI += " \
++	file://0001-systemd-networkd-wait-online.service-WA-remove-netwo.patch \
++"
+-- 
+2.25.1
+
