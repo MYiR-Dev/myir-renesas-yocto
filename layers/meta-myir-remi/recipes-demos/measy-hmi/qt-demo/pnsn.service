@@ -1,0 +1,9 @@
+[Unit]
+Description=VIN initializing setting
+After=systemd-initctl.service
+
+[Service]
+ExecStart=/home/eeprom.sh
+
+[Install]
+WantedBy=multi-user.target

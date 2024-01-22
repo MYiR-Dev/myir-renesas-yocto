@@ -1,0 +1,26 @@
+From ea7d17188769ae5526b6091bd283d5d8b4a1708c Mon Sep 17 00:00:00 2001
+From: Canh Dao <canh.dao.ct@renesas.com>
+Date: Sun, 17 Apr 2022 19:10:36 +0700
+Subject: [PATCH] arm64: dts: renesas: rzg2l-smarc: Disable OSTM2 to be used in
+ FreeRTOS
+
+---
+ arch/arm64/boot/dts/renesas/rzg2l-smarc-som.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/renesas/rzg2l-smarc-som.dtsi b/arch/arm64/boot/dts/renesas/rzg2l-smarc-som.dtsi
+index 7a138ba74265..bec89ab5dc0e 100644
+--- a/arch/arm64/boot/dts/renesas/rzg2l-smarc-som.dtsi
++++ b/arch/arm64/boot/dts/renesas/rzg2l-smarc-som.dtsi
+@@ -189,7 +189,7 @@ &ostm1 {
+ };
+ 
+ &ostm2 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pinctrl {
+-- 
+2.25.1
+

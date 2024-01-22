@@ -1,0 +1,187 @@
+{
+    "Product": [
+        {
+            "PN": "MYD-YG2L32-V01",
+            "SN": "WK202308220230027",
+            "CN": "01",
+            "LOG_LEVEL":8,
+            "VIEW_LOG":1,
+	        "RECORD_PER_MIN":1440,
+            "RECORD_LOG_PATH":"./aging_log.txt",
+            "RECORD_LOG_SIZE":715200,
+            "TEST_MODE":2,
+            "CPU_LOAD":0
+        },
+        {
+            "RAM": [
+                    {
+                        "NAME": "ram_test",
+                        "CMD": null,
+                        "ARGS": "-b 10M -c 2",
+                        "LOOPS": 1,
+		                "LEVEL": 2
+                    }
+                ],
+                "HS_NET": [
+                    {
+                        "NAME": "net_test1",
+                        "CMD": null,
+                        "ARGS": "-sh /usr/share/myir_test/net_test.sh -node eth0 -I 192.168.40.123",
+                        "LOOPS": 1,
+                        "LEVEL": 2
+                    },
+                    {
+                        "NAME": "net_test2",
+                        "CMD": null,
+                        "ARGS": "-sh /usr/share/myir_test/net_test.sh -node eth1 -I 192.168.40.234",
+                        "LOOPS": 1,
+                        "LEVEL": 2
+                    },
+                    {                           
+                        "NAME": "wifi_test1",  
+                        "CMD": null,          
+                        "ARGS": "-sh /usr/share/myir_test/net_test.sh -node wlan0 -I 192.168.30.248",
+                        "LOOPS": 1,                                                 
+                        "LEVEL": 2                                                  
+                    }
+                ],
+            "RTC": [                            
+                    {                                                               
+                        "NAME": "rtc_test",                                     
+                        "CMD": null,                                              
+                        "ARGS": "-t 1 -d /dev/rtc0 -loop_time 2",
+                        "LOOPS": 1 ,                       
+                        "LEVEL": 2  
+                    }                             
+                ],
+	        "EEPROM": [
+                    {
+                        "NAME": "eeprom_test",
+                        "CMD": null,
+                        "ARGS": "-y 3 -t 10 ", 
+                        "LOOPS": 1,
+                        "LEVEL": 2
+                    }
+                ],
+	        "FILEIO": [    
+	      	        {        
+                        "NAME": "mmc_test",
+                        "CMD": null,
+                        "ARGS": "--dir-path ./ --hdd-bytes 5242880 -t 1",
+                        "LOOPS": 1, 
+                        "LEVEL": 2              
+  		            }                   
+		        ],
+            "UART": [
+                {
+                    "NAME": "RS232_test",
+                    "CMD": null,
+                    "ARGS": "-d /dev/ttySC2 -b 115200 -ori_string MYIR -t 2",
+                    "LOOPS": 1,
+                    "LEVEL": 2
+                },
+                {
+                    "NAME": "RS485_test",
+                    "CMD": null,
+                    "ARGS": "-d /dev/ttySC4 -b 115200 -ori_string MYIR -e 1 -rs485_gpio 376 -t 2 -m 1 -rs485_unable_flag 1 -rs485_activity 0 -timeout 10 -wr_delay 500000",
+                    "LOOPS": 1,
+                    "LEVEL": 2
+                }
+                ],
+            "CAN": [
+                {
+                    "NAME": "can_test",
+                    "CMD": null,
+                    "ARGS": "-d can0 -b 500000 -c",
+                    "LOOPS": 1,
+                    "LEVEL": 2
+                }
+            ],
+            "BT": [
+                {
+                    "NAME": "bt_test1",
+                    "CMD": null,
+                    "ARGS": "-I hci0 -t 10 ",     
+                    "LOOPS": 1,
+                    "LEVEL": 2
+                }
+            ],
+	        "BLOCK": [  
+		            {
+                        "NAME": "usb1_test",
+                        "CMD": null,
+                        "ARGS": " -sys_block_path /sys/devices/platform/soc/11c70100.usb/ -block_index 1-1\\.1:1\\.0 -t 1 --hdd-bytes 1048576",       
+                        "LOOPS": 1,
+                        "LEVEL": 2
+                    },
+		            {
+                        "NAME": "usb2_test",
+                        "CMD": null,
+                        "ARGS": "-sys_block_path /sys/devices/platform/soc/11c70100.usb/ -block_index 1-1\\.2:1\\.0 -t 1 --hdd-bytes 1048576 ",        
+                        "LOOPS": 1,
+                        "LEVEL": 2
+                    },
+		            {   
+                        "NAME": "otg_test",
+                        "CMD": null,
+                        "ARGS": " -sys_block_path /sys/devices/platform/soc/11c50000.usb/usb2/ -block_index 2-1:1\\.0 -t 1 --hdd-bytes 1048576 ",
+		                "LOOPS": 1,
+                        "LEVEL": 2
+                    }
+                ],
+                "AUDIO": [
+                    {
+                          "NAME": "audio_test1",
+                          "CMD": " aplay -Dhw:1,0 /usr/share/myir_test/01Singalongsong.wav &",
+                          "ARGS": null, 
+                          "LOOPS": 1 ,
+                          "LEVEL": 33
+                    },
+                    {
+                        "NAME": "camera_test1",
+                        "CMD": "/usr/share/myir_test/camera.sh",
+                        "ARGS": null, 
+                        "LOOPS": 1 ,
+                        "LEVEL": 33
+                    },
+                    {
+                        "NAME": "LVDS_test1",
+                        "CMD": "/home/root",
+                        "ARGS": null, 
+                        "LOOPS": 1 ,
+                        "LEVEL": 33
+                    },
+                    {
+                        "NAME": "HDMI_test1",
+                        "CMD": "aplay -Dhw:0,0 /usr/share/myir_test/01Singalongsong.wav &",
+                        "ARGS": null, 
+                        "LOOPS": 1 ,
+                        "LEVEL": 33
+                    },
+                    {
+                        "NAME": "sdcard_test",
+                        "CMD": "/home/root/",
+                        "ARGS": null,       
+                        "LOOPS": 1,
+                        "LEVEL": 33
+                    }, 
+                    {
+                        "NAME": "LED_test1",
+                        "CMD": "/home/root",
+                        "ARGS": null, 
+                        "LOOPS": 1 ,
+                        "LEVEL": 33
+                    }
+                  ], 
+                  "KEY": [                            
+                    {                                                               
+                          "NAME": "user_test1",                                     
+                          "CMD": null,                                              
+                          "ARGS": "-d platform-keyboard-event -v 2 -t 1",
+                          "LOOPS": 1 ,                       
+                          "LEVEL": 55  
+                    }                             
+                ]
+        }
+    ]
+}

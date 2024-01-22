@@ -1,0 +1,13 @@
+[Unit]
+Description=Stop weston........ 
+#Before=serial-getty@ttySC0.service
+After=myir.service weston@.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh  /usr/bin/stop-weston.sh
+
+[Install]
+WantedBy=multi-user.target
+Alias=quit-weston.service
+
